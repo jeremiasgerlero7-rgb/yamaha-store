@@ -76,7 +76,7 @@ const Profile = () => {
             formData.append('image', selectedFile);
 
             const token = localStorage.getItem('token');
-            const API_URL = 'http://localhost:5000';
+            const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
             const res = await fetch(`${API_URL}/api/auth/upload-profile-picture`, {
                 method: 'POST',
@@ -103,7 +103,7 @@ const Profile = () => {
         setIsUploading(true);
         try {
             const token = localStorage.getItem('token');
-            const API_URL = 'http://localhost:5000';
+            const API_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 
             const res = await fetch(`${API_URL}/api/auth/update-avatar`, {
                 method: 'PUT',

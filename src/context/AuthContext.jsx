@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
     // ➜ 2. Verifica token y obtiene usuario actualizado
     const token = localStorage.getItem('token');
     if (token) {
-      fetch('http://localhost:5000/api/auth/me', {
+      fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       })
         .then(res => res.json())
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
 
   // 🔐 LOGIN TRADICIONAL
   const login = async (email, password) => {
-    const res = await fetch('http://localhost:5000/api/auth/login', {
+    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }) => {
 
   // 📝 REGISTRO TRADICIONAL
   const register = async (name, email, password) => {
-    const res = await fetch('http://localhost:5000/api/auth/register', {
+    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, email, password }),
@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }) => {
   const loginWithGoogle = async (credential) => {
     console.log('🔵 1. Enviando credential a backend:', credential?.substring(0, 50) + '...');
     
-    const res = await fetch('http://localhost:5000/api/auth/google', {
+    const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}/auth/google`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ credential }),

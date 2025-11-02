@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { ChevronDown, Award, Users, Clock, Headphones, Camera, Upload, X } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
-
 const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
 // ⭐ NUEVO: Notificación de bienvenida

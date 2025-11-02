@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
-const API_URL = `${import.meta.env.VITE_API_URL}/products`;
+const API_URL = `${import.meta.env.VITE_API_URL}/users`;
 
 const Users = () => {
   const [users, setUsers] = useState([]);

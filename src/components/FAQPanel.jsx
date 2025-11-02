@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "../context/AuthContext"
 import toast from "react-hot-toast"
 
-const API_URL = "http://localhost:5000/api"
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 const FAQPanel = ({ isOpen, onClose }) => {
   const { currentUser } = useAuth()
