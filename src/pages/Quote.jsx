@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Phone, Mail, MapPin, MessageCircle, Check } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api/products';
+const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 const WHATSAPP_NUMBER = '5493541567273'; // Formato internacional
 
 const Quote = () => {

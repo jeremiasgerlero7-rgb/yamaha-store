@@ -4,7 +4,7 @@ import CategoryFilter from '../components/CategoryFilter';
 import { motion } from 'framer-motion';
 import { Bike, Truck, Award, Calendar, Sparkles, Grid3x3, List, ChevronRight } from 'lucide-react';
 
-const API_URL = 'http://localhost:5000/api/products';
+const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
 const Models = () => {
   const [products, setProducts] = useState([]);

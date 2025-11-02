@@ -6,7 +6,7 @@ import { Plus, Users, X, Camera, Upload } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = 'http://localhost:5000/api/products';
+const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
 // Modal de confirmación personalizado
 const DeleteConfirmModal = ({ vehicle, onConfirm, onCancel }) => {

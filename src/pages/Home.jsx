@@ -6,7 +6,7 @@ import { ChevronDown, Award, Users, Clock, Headphones, Camera, Upload, X } from 
 import toast from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
-const API_URL = 'http://localhost:5000/api/products';
+const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
 // ⭐ NUEVO: Notificación de bienvenida
 const WelcomeNotification = ({ user, onClose, onUploadPhoto }) => {
