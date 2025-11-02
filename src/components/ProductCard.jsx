@@ -1,5 +1,6 @@
 import { ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import OptimizedImage from './OptimizedImage';
 
 const ProductCard = ({ product }) => {
   // Función para transformar URL de Cloudinary y forzar tamaño uniforme
@@ -20,12 +21,13 @@ const ProductCard = ({ product }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 flex flex-col h-full">
-      {/* Contenedor de imagen con altura fija */}
+      {/* Contenedor de imagen con altura fija - USANDO OptimizedImage */}
       <div className="relative w-full h-64 bg-gray-200 flex-shrink-0">
-        <img 
+        <OptimizedImage
           src={getOptimizedImageUrl(product.imagen)}
           alt={product.nombre}
-          className="w-full h-full object-cover"
+          className="w-full h-64"
+          placeholder="https://res.cloudinary.com/dbqapcw0r/image/upload/w_800,h_600,c_fill,g_center,q_auto,f_auto/moto.jpg"
           onError={(e) => {
             e.target.src = 'https://res.cloudinary.com/dbqapcw0r/image/upload/w_800,h_600,c_fill,g_center,q_auto,f_auto/moto.jpg';
           }}

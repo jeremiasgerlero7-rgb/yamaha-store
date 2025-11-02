@@ -1,41 +1,47 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/logoyamaha.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="/manifest.json" />
-    
-    <!-- Theme color para la barra de navegación en móviles -->
-    <meta name="theme-color" content="#000000" />
-    
-    <!-- Para iOS -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
-    <meta name="apple-mobile-web-app-title" content="Yamaha Store" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
-    
-    <title>Yamaha Store</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/service-worker.js')
-            .then(registration => {
-              console.log('SW registrado correctamente:', registration);
-            })
-            .catch(error => {
-              console.log('Error al registrar SW:', error);
-            });
-        });
-      }
-    </script>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#0066cc" />
+  <meta name="description" content="Yamaha - Las mejores motos y cuatriciclos en Argentina" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
+  
+  <!-- Preconnect a APIs importantes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://res.cloudinary.com" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+  
+  <!-- Preload crítico -->
+  <link rel="preload" as="style" href="/src/index.css" />
+  
+  <title>Yamaha Motors - Motos y Cuatriciclos</title>
+</head>
+<body>
+  <div id="root"></div>
+  
+  <!-- Script de registro del SW mejorado -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js')
+          .then(registration => {
+            console.log('SW registrado:', registration);
+            
+            // Verificar actualizaciones cada 60 segundos
+            setInterval(() => {
+              registration.update();
+            }, 60000);
+          })
+          .catch(err => console.log('Error SW:', err));
+      });
+    }
+  </script>
+  
+  <script type="module" src="/src/main.jsx"></script>
+</body>
 </html>

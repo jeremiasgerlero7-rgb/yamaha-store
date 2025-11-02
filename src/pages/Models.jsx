@@ -3,6 +3,7 @@ import ProductCard from '../components/ProductCard';
 import CategoryFilter from '../components/CategoryFilter';
 import { motion } from 'framer-motion';
 import { Bike, Truck, Award, Calendar, Sparkles, Grid3x3, List, ChevronRight } from 'lucide-react';
+import OptimizedImage from '../components/OptimizedImage';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
