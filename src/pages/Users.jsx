@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, X, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, X, AlertTriangle, Menu } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/users`;
@@ -206,119 +206,207 @@ const Users = () => {
         }}
       />
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <div className="flex items-center space-x-4">
-            <button
-              onClick={() => window.history.back()}
-              className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition"
-            >
-              <ArrowLeft className="h-5 w-5" />
-              <span>Volver</span>
-            </button>
-            <h1 className="text-3xl font-bold text-gray-900">Administrar Usuarios</h1>
-          </div>
-          <div className="flex space-x-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {/* Header - RESPONSIVE */}
+        <div className="mb-6 sm:mb-8">
+          {/* Mobile Layout */}
+          <div className="flex flex-col space-y-4 sm:hidden">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => window.history.back()}
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span className="text-sm">Volver</span>
+              </button>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Crear Admin</span>
+              </button>
+            </div>
+            
+            <h1 className="text-2xl font-bold text-gray-900">
+              Administrar Usuarios
+            </h1>
+            
             {selectedUsers.length > 0 && (
               <button
                 onClick={handleBulkDeleteClick}
-                className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                className="w-full flex items-center justify-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm"
               >
-                <Trash2 className="h-5 w-5" />
-                <span>Eliminar ({selectedUsers.length})</span>
+                <Trash2 className="h-4 w-4" />
+                <span>Eliminar Seleccionados ({selectedUsers.length})</span>
               </button>
             )}
-            <button
-              onClick={() => setShowCreateModal(true)}
-              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-            >
-              <Plus className="h-5 w-5" />
-              <span>Crear Administrador</span>
-            </button>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden sm:flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => window.history.back()}
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition"
+              >
+                <ArrowLeft className="h-5 w-5" />
+                <span>Volver</span>
+              </button>
+              <h1 className="text-3xl font-bold text-gray-900">Administrar Usuarios</h1>
+            </div>
+            <div className="flex space-x-4">
+              {selectedUsers.length > 0 && (
+                <button
+                  onClick={handleBulkDeleteClick}
+                  className="flex items-center space-x-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                >
+                  <Trash2 className="h-5 w-5" />
+                  <span>Eliminar ({selectedUsers.length})</span>
+                </button>
+              )}
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                <Plus className="h-5 w-5" />
+                <span>Crear Administrador</span>
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Tabla de usuarios */}
+        {/* Tabla de usuarios - RESPONSIVE */}
         {loading ? (
           <div className="text-center py-8">
-            <p className="text-gray-500">Cargando usuarios...</p>
+            <p className="text-gray-500 text-sm sm:text-base">Cargando usuarios...</p>
           </div>
         ) : (
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left">
-                    <input
-                      type="checkbox"
-                      checked={selectedUsers.length === users.length && users.length > 0}
-                      onChange={handleSelectAll}
-                      className="rounded border-gray-300"
-                    />
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nombre
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Email
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Rol
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {users.map((user) => (
-                  <tr key={user._id} className={selectedUsers.includes(user._id) ? 'bg-blue-50' : 'hover:bg-gray-50'}>
-                    <td className="px-6 py-4 whitespace-nowrap">
+          <>
+            {/* Desktop Table */}
+            <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left">
+                        <input
+                          type="checkbox"
+                          checked={selectedUsers.length === users.length && users.length > 0}
+                          onChange={handleSelectAll}
+                          className="rounded border-gray-300"
+                        />
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Nombre
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Email
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Rol
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {users.map((user) => (
+                      <tr key={user._id} className={selectedUsers.includes(user._id) ? 'bg-blue-50' : 'hover:bg-gray-50'}>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={selectedUsers.includes(user._id)}
+                            onChange={() => handleSelectUser(user._id)}
+                            className="rounded border-gray-300"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">{user.email}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                            user.role === 'admin' 
+                              ? 'bg-purple-100 text-purple-800' 
+                              : 'bg-green-100 text-green-800'
+                          }`}>
+                            {user.role.toUpperCase()}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => handleDeleteClick(user)}
+                            className="text-red-600 hover:text-red-900 transition flex items-center space-x-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            <span>Eliminar</span>
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Mobile Cards */}
+            <div className="md:hidden space-y-4">
+              {users.map((user) => (
+                <div 
+                  key={user._id} 
+                  className={`bg-white rounded-lg shadow p-4 ${
+                    selectedUsers.includes(user._id) ? 'ring-2 ring-blue-500' : ''
+                  }`}
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-start space-x-3 flex-1 min-w-0">
                       <input
                         type="checkbox"
                         checked={selectedUsers.includes(user._id)}
                         onChange={() => handleSelectUser(user._id)}
-                        className="rounded border-gray-300"
+                        className="mt-1 rounded border-gray-300"
                       />
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{user.name}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{user.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        user.role === 'admin' 
-                          ? 'bg-purple-100 text-purple-800' 
-                          : 'bg-green-100 text-green-800'
-                      }`}>
-                        {user.role.toUpperCase()}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <button
-                        onClick={() => handleDeleteClick(user)}
-                        className="text-red-600 hover:text-red-900 transition flex items-center space-x-1"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                        <span>Eliminar</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-semibold text-gray-900 truncate">
+                          {user.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 truncate mt-1">
+                          {user.email}
+                        </p>
+                      </div>
+                    </div>
+                    <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${
+                      user.role === 'admin' 
+                        ? 'bg-purple-100 text-purple-800' 
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {user.role.toUpperCase()}
+                    </span>
+                  </div>
+                  
+                  <button
+                    onClick={() => handleDeleteClick(user)}
+                    className="w-full mt-2 flex items-center justify-center space-x-2 text-red-600 hover:bg-red-50 py-2 rounded-lg transition text-sm font-medium"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    <span>Eliminar</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </>
         )}
 
-        {/* Modal Crear Admin */}
+        {/* Modal Crear Admin - RESPONSIVE */}
         {showCreateModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg p-8 max-w-md w-full shadow-2xl">
+            <div className="bg-white rounded-lg p-6 sm:p-8 max-w-md w-full shadow-2xl">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-gray-900">Crear Administrador</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900">Crear Administrador</h2>
                 <button
                   onClick={() => {
                     setShowCreateModal(false);
@@ -326,7 +414,7 @@ const Users = () => {
                   }}
                   className="text-gray-400 hover:text-gray-600 transition"
                 >
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5 sm:h-6 sm:w-6" />
                 </button>
               </div>
               <div className="space-y-4">
@@ -338,7 +426,7 @@ const Users = () => {
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                     placeholder="Juan Pérez"
                   />
                 </div>
@@ -350,7 +438,7 @@ const Users = () => {
                     type="email"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                     placeholder="juan@example.com"
                   />
                 </div>
@@ -362,25 +450,25 @@ const Users = () => {
                     type="password"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
                     placeholder="••••••••"
                   />
                 </div>
-                <div className="flex space-x-4 mt-6">
+                <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4 mt-6">
                   <button
                     type="button"
                     onClick={() => {
                       setShowCreateModal(false);
                       setFormData({ name: '', email: '', password: '' });
                     }}
-                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm sm:text-base"
                   >
                     Cancelar
                   </button>
                   <button
                     type="button"
                     onClick={handleCreateAdmin}
-                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
+                    className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium text-sm sm:text-base"
                   >
                     Crear
                   </button>
@@ -390,16 +478,16 @@ const Users = () => {
           </div>
         )}
 
-        {/* Modal de Confirmación de Eliminación Individual */}
+        {/* Modal de Confirmación de Eliminación Individual - RESPONSIVE */}
         {showDeleteModal && userToDelete && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-4 sm:p-6">
+              <div className="flex items-start sm:items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="bg-red-100 rounded-full p-2">
-                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                    <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                     Confirmar Eliminación
                   </h3>
                 </div>
@@ -415,16 +503,20 @@ const Users = () => {
               </div>
               
               <div className="mb-6">
-                <p className="text-gray-600 mb-4">
+                <p className="text-sm sm:text-base text-gray-600 mb-4">
                   ¿Estás seguro que quieres eliminar a:
                 </p>
-                <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-red-500">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold text-gray-900">{userToDelete.name}</p>
-                      <p className="text-sm text-gray-600">{userToDelete.email}</p>
+                <div className="bg-gray-50 rounded-lg p-3 sm:p-4 border-l-4 border-red-500">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                        {userToDelete.name}
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-600 truncate">
+                        {userToDelete.email}
+                      </p>
                     </div>
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                    <span className={`px-2 sm:px-3 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${
                       userToDelete.role === 'admin' 
                         ? 'bg-purple-100 text-purple-800' 
                         : 'bg-green-100 text-green-800'
@@ -433,24 +525,24 @@ const Users = () => {
                     </span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 mt-3">
+                <p className="text-xs sm:text-sm text-gray-500 mt-3">
                   Esta acción no se puede deshacer.
                 </p>
               </div>
 
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                 <button
                   onClick={() => {
                     setShowDeleteModal(false);
                     setUserToDelete(null);
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm sm:text-base"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleConfirmDelete}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
+                  className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium text-sm sm:text-base"
                 >
                   Eliminar
                 </button>
@@ -459,16 +551,16 @@ const Users = () => {
           </div>
         )}
 
-        {/* Modal de Confirmación de Eliminación Masiva */}
+        {/* Modal de Confirmación de Eliminación Masiva - RESPONSIVE */}
         {showBulkDeleteModal && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-6">
-              <div className="flex items-center justify-between mb-4">
+            <div className="bg-white rounded-lg shadow-2xl max-w-md w-full p-4 sm:p-6">
+              <div className="flex items-start sm:items-center justify-between mb-4">
                 <div className="flex items-center space-x-3">
                   <div className="bg-red-100 rounded-full p-2">
-                    <AlertTriangle className="h-6 w-6 text-red-600" />
+                    <AlertTriangle className="h-5 w-5 sm:h-6 sm:w-6 text-red-600" />
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                     Confirmar Eliminación Masiva
                   </h3>
                 </div>
@@ -481,29 +573,29 @@ const Users = () => {
               </div>
               
               <div className="mb-6">
-                <p className="text-gray-600 mb-4">
+                <p className="text-sm sm:text-base text-gray-600 mb-4">
                   ¿Estás seguro que quieres eliminar <strong>{selectedUsers.length}</strong> usuarios?
                 </p>
-                <div className="bg-red-50 rounded-lg p-4 border-l-4 border-red-500">
-                  <p className="text-sm text-red-800 font-medium">
+                <div className="bg-red-50 rounded-lg p-3 sm:p-4 border-l-4 border-red-500">
+                  <p className="text-xs sm:text-sm text-red-800 font-medium">
                     Esta acción eliminará permanentemente {selectedUsers.length} {selectedUsers.length === 1 ? 'usuario' : 'usuarios'} del sistema.
                   </p>
                 </div>
-                <p className="text-sm text-gray-500 mt-3">
+                <p className="text-xs sm:text-sm text-gray-500 mt-3">
                   Esta acción no se puede deshacer.
                 </p>
               </div>
 
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
                 <button
                   onClick={() => setShowBulkDeleteModal(false)}
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition font-medium text-sm sm:text-base"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleConfirmBulkDelete}
-                  className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
+                  className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium text-sm sm:text-base"
                 >
                   Eliminar {selectedUsers.length}
                 </button>

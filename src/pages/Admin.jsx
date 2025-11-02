@@ -2,46 +2,48 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VehicleTable from '../components/Admin/VehicleTable';
 import VehicleForm from '../components/Admin/VehicleForm';
-import { Plus, Users, X, Camera, Upload } from 'lucide-react';
+import { Plus, Users, X, Camera, Upload, Menu } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
-// Modal de confirmación personalizado
+// Modal de confirmación personalizado - RESPONSIVE
 const DeleteConfirmModal = ({ vehicle, onConfirm, onCancel }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-6 animate-fadeIn">
+      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-4 sm:p-6 animate-fadeIn">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-gray-900">Confirmar Eliminación</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900">Confirmar Eliminación</h3>
           <button
             onClick={onCancel}
             className="text-gray-400 hover:text-gray-600 transition"
           >
-            <X className="h-6 w-6" />
+            <X className="h-5 w-5 sm:h-6 sm:w-6" />
           </button>
         </div>
 
         <div className="mb-6">
-          <p className="text-gray-600 mb-4">
+          <p className="text-sm sm:text-base text-gray-600 mb-4">
             ¿Estás seguro que quieres eliminar este vehículo?
           </p>
           
-          <div className="border rounded-lg p-4 bg-gray-50">
-            <div className="flex items-center space-x-4">
+          <div className="border rounded-lg p-3 sm:p-4 bg-gray-50">
+            <div className="flex items-center space-x-3 sm:space-x-4">
               <img
                 src={vehicle.imagen}
                 alt={vehicle.nombre}
-                className="w-20 h-20 object-cover rounded-lg"
+                className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg flex-shrink-0"
                 onError={(e) => {
                   e.target.src = 'https://via.placeholder.com/80?text=Sin+Imagen';
                 }}
               />
-              <div className="flex-1">
-                <h4 className="font-semibold text-gray-900">{vehicle.nombre}</h4>
-                <p className="text-sm text-gray-500 capitalize">{vehicle.categoria}</p>
-                <p className="text-sm font-medium text-blue-600">
+              <div className="flex-1 min-w-0">
+                <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                  {vehicle.nombre}
+                </h4>
+                <p className="text-xs sm:text-sm text-gray-500 capitalize">{vehicle.categoria}</p>
+                <p className="text-xs sm:text-sm font-medium text-blue-600">
                   ${vehicle.precio?.toLocaleString('es-AR')}
                 </p>
               </div>
@@ -49,16 +51,16 @@ const DeleteConfirmModal = ({ vehicle, onConfirm, onCancel }) => {
           </div>
         </div>
 
-        <div className="flex space-x-3">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium"
+            className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm sm:text-base"
           >
             Cancelar
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium"
+            className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium text-sm sm:text-base"
           >
             Eliminar
           </button>
@@ -68,12 +70,11 @@ const DeleteConfirmModal = ({ vehicle, onConfirm, onCancel }) => {
   );
 };
 
-// ⭐ NUEVO: Notificación de bienvenida
+// Notificación de bienvenida - RESPONSIVE
 const WelcomeNotification = ({ user, onClose, onUploadPhoto }) => {
   const [show, setShow] = useState(true);
 
   useEffect(() => {
-    // Solo mostrar si NO es usuario de Google y tiene la marca en localStorage
     const shouldShow = localStorage.getItem('showWelcomeNotification');
     if (user.isGoogleAuth || !shouldShow) {
       setShow(false);
@@ -89,44 +90,44 @@ const WelcomeNotification = ({ user, onClose, onUploadPhoto }) => {
   };
 
   return (
-    <div className="fixed top-20 right-4 max-w-md bg-white rounded-lg shadow-2xl border-2 border-blue-200 p-6 z-50 animate-slideIn">
+    <div className="fixed top-16 sm:top-20 left-4 right-4 sm:left-auto sm:right-4 max-w-md bg-white rounded-lg shadow-2xl border-2 border-blue-200 p-4 sm:p-6 z-50 animate-slideIn">
       <button 
         onClick={handleClose}
-        className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition"
+        className="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-400 hover:text-gray-600 transition"
       >
-        <X size={20} />
+        <X size={18} className="sm:w-5 sm:h-5" />
       </button>
       
-      <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-          <Camera className="text-blue-600" size={24} />
+      <div className="flex items-start gap-3 sm:gap-4">
+        <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
+          <Camera className="text-blue-600" size={20} />
         </div>
         
         <div className="flex-1">
-          <h3 className="text-lg font-bold text-gray-900 mb-2">
+          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">
             ¡Bienvenido, {user.name}! 👋
           </h3>
           
-          <p className="text-sm text-gray-600 mb-4">
+          <p className="text-xs sm:text-sm text-gray-600 mb-4">
             Como no iniciaste sesión con Google, tienes una foto de perfil predeterminada. 
             Pero no te preocupes, <strong>puedes personalizarla cuando quieras</strong>.
           </p>
           
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               onClick={() => {
                 handleClose();
                 onUploadPhoto?.();
               }}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs sm:text-sm font-medium"
             >
-              <Upload size={16} />
+              <Upload size={14} />
               Subir foto ahora
             </button>
             
             <button
               onClick={handleClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition text-sm font-medium"
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition text-xs sm:text-sm font-medium"
             >
               Más tarde
             </button>
@@ -147,11 +148,11 @@ const Admin = () => {
   const [vehicleToDelete, setVehicleToDelete] = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
     fetchVehicles();
     
-    // Verificar si debe mostrar la notificación de bienvenida
     const shouldShowWelcome = localStorage.getItem('showWelcomeNotification');
     if (shouldShowWelcome === 'true' && currentUser && !currentUser.isGoogleAuth) {
       setShowWelcome(true);
@@ -280,8 +281,6 @@ const Admin = () => {
   const handleDeleteVehicle = async (vehicleId) => {
     const vehicle = vehicles.find(v => v._id === vehicleId);
     if (!vehicle) return;
-    
-    // Mostrar modal de confirmación
     setVehicleToDelete(vehicle);
   };
 
@@ -326,7 +325,6 @@ const Admin = () => {
   };
 
   const handleUploadPhoto = () => {
-    // TODO: Implementar modal para subir foto
     toast.info('Función de subir foto próximamente');
     setShowProfileModal(true);
   };
@@ -367,7 +365,7 @@ const Admin = () => {
         }}
       />
 
-      {/* ⭐ NOTIFICACIÓN DE BIENVENIDA */}
+      {/* NOTIFICACIÓN DE BIENVENIDA */}
       {showWelcome && currentUser && (
         <WelcomeNotification
           user={currentUser}
@@ -385,34 +383,64 @@ const Admin = () => {
         />
       )}
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Panel de Administración</h1>
-          <div className="flex space-x-4">
-            <button
-              onClick={() => navigate('/users')}
-              className="flex items-center space-x-2 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-            >
-              <Users className="h-5 w-5" />
-              <span>Administrar Usuarios</span>
-            </button>
-            <button
-              onClick={() => {
-                console.log('🔘 Botón Agregar Vehículo clickeado');
-                setEditingVehicle(null);
-                setShowForm(true);
-              }}
-              className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-            >
-              <Plus className="h-5 w-5" />
-              <span>Agregar Vehículo</span>
-            </button>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        {/* Header - RESPONSIVE */}
+        <div className="mb-6 sm:mb-8">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Panel de Administración
+            </h1>
+            
+            {/* Desktop Buttons */}
+            <div className="hidden sm:flex space-x-4">
+              <button
+                onClick={() => navigate('/users')}
+                className="flex items-center space-x-2 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
+              >
+                <Users className="h-5 w-5" />
+                <span>Administrar Usuarios</span>
+              </button>
+              <button
+                onClick={() => {
+                  console.log('🔘 Botón Agregar Vehículo clickeado');
+                  setEditingVehicle(null);
+                  setShowForm(true);
+                }}
+                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                <Plus className="h-5 w-5" />
+                <span>Agregar Vehículo</span>
+              </button>
+            </div>
+
+            {/* Mobile Buttons */}
+            <div className="flex sm:hidden gap-2">
+              <button
+                onClick={() => navigate('/users')}
+                className="flex-1 flex items-center justify-center space-x-2 bg-gray-700 text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition text-sm"
+              >
+                <Users className="h-4 w-4" />
+                <span>Usuarios</span>
+              </button>
+              <button
+                onClick={() => {
+                  console.log('🔘 Botón Agregar Vehículo clickeado');
+                  setEditingVehicle(null);
+                  setShowForm(true);
+                }}
+                className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+              >
+                <Plus className="h-4 w-4" />
+                <span>Agregar</span>
+              </button>
+            </div>
           </div>
         </div>
 
+        {/* Content */}
         {loading ? (
           <div className="text-center py-8">
-            <p className="text-gray-500">Cargando vehículos...</p>
+            <p className="text-gray-500 text-sm sm:text-base">Cargando vehículos...</p>
           </div>
         ) : (
           <VehicleTable
