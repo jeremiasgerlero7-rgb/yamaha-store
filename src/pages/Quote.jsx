@@ -38,7 +38,7 @@ const Quote = () => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!formData.nombre || !formData.telefono) {
@@ -46,7 +46,32 @@ const Quote = () => {
       return;
     }
 
-    // Construir mensaje para WhatsApp
+    // Guardar lead en la base de datos
+    try {
+      const response = await fetch('https://yamaha-store-backend.onrender.com/api/leads', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          nombre: formData.nombre,
+          apellido: '', // No tienes apellido en el formulario, envío vacío
+          email: formData.email || '',
+          telefono: formData.telefono,
+          vehiculo: product.nombre, // El nombre del producto
+          mensaje: formData.mensaje || ''
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Error al guardar el lead');
+      }
+    } catch (error) {
+      console.error('Error al guardar lead:', error);
+      // No detenemos el flujo, el usuario puede continuar a WhatsApp
+    }
+
+    // Construir mensaje para WhatsApp (MANTIENE FUNCIONALIDAD ORIGINAL)
     let mensaje = `Hola! Me interesa cotizar:\n\n`;
     mensaje += `*${product.nombre}*\n`;
     mensaje += `Precio: $${product.precio.toLocaleString()}\n\n`;
