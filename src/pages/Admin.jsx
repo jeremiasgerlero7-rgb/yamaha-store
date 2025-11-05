@@ -28,7 +28,7 @@ const DeleteConfirmModal = ({ vehicle, onConfirm, onCancel }) => {
           <p className="text-sm sm:text-base text-gray-600 mb-4">
             ¿Estás seguro que quieres eliminar este vehículo?
           </p>
-          
+
           <div className="border rounded-lg p-3 sm:p-4 bg-gray-50">
             <div className="flex items-center space-x-3 sm:space-x-4">
               <OptimizedImage
@@ -89,28 +89,28 @@ const WelcomeNotification = ({ user, onClose, onUploadPhoto }) => {
 
   return (
     <div className="fixed top-16 sm:top-20 left-4 right-4 sm:left-auto sm:right-4 max-w-md bg-white rounded-lg shadow-2xl border-2 border-blue-200 p-4 sm:p-6 z-50 animate-slideIn">
-      <button 
+      <button
         onClick={handleClose}
         className="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-400 hover:text-gray-600 transition"
       >
         <X size={18} className="sm:w-5 sm:h-5" />
       </button>
-      
+
       <div className="flex items-start gap-3 sm:gap-4">
         <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
           <Camera className="text-blue-600" size={20} />
         </div>
-        
+
         <div className="flex-1">
           <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">
             ¡Bienvenido, {user.name}! 👋
           </h3>
-          
+
           <p className="text-xs sm:text-sm text-gray-600 mb-4">
-            Como no iniciaste sesión con Google, tienes una foto de perfil predeterminada. 
+            Como no iniciaste sesión con Google, tienes una foto de perfil predeterminada.
             Pero no te preocupes, <strong>puedes personalizarla cuando quieras</strong>.
           </p>
-          
+
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               onClick={() => {
@@ -122,7 +122,7 @@ const WelcomeNotification = ({ user, onClose, onUploadPhoto }) => {
               <Upload size={14} />
               Subir foto ahora
             </button>
-            
+
             <button
               onClick={handleClose}
               className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition text-xs sm:text-sm font-medium"
@@ -143,8 +143,8 @@ const MobileVehicleCards = ({ vehicles, onEdit, onDelete }) => {
   return (
     <div className="md:hidden space-y-4">
       {vehicles.map((vehicle) => (
-        <div 
-          key={vehicle._id} 
+        <div
+          key={vehicle._id}
           className="bg-white rounded-lg shadow-md overflow-hidden"
         >
           {/* Imagen del Vehículo */}
@@ -154,11 +154,10 @@ const MobileVehicleCards = ({ vehicles, onEdit, onDelete }) => {
               alt={vehicle.nombre}
               className="w-full h-48"
             />
-            <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full ${
-              vehicle.disponible 
-                ? 'bg-green-100 text-green-800' 
+            <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full ${vehicle.disponible
+                ? 'bg-green-100 text-green-800'
                 : 'bg-red-100 text-red-800'
-            }`}>
+              }`}>
               {vehicle.disponible ? 'Disponible' : 'No disponible'}
             </span>
           </div>
@@ -232,7 +231,7 @@ const Admin = () => {
 
   useEffect(() => {
     fetchVehicles();
-    
+
     const shouldShowWelcome = localStorage.getItem('showWelcomeNotification');
     if (shouldShowWelcome === 'true' && currentUser && !currentUser.isGoogleAuth) {
       setShowWelcome(true);
@@ -255,10 +254,10 @@ const Admin = () => {
 
   const handleAddVehicle = async (data) => {
     const loadingToast = toast.loading('Subiendo imagen y creando vehículo...');
-    
+
     try {
       console.log('📦 Datos recibidos del formulario:', data);
-      
+
       const productData = {
         nombre: data.nombre || data.name || '',
         categoria: data.categoria || data.category || 'moto',
@@ -292,7 +291,7 @@ const Admin = () => {
 
       await fetchVehicles();
       setShowForm(false);
-      
+
       toast.success(`🎉 ${productData.nombre} agregado exitosamente`, {
         id: loadingToast,
         duration: 4000,
@@ -307,10 +306,10 @@ const Admin = () => {
 
   const handleEditVehicle = async (vehicleData) => {
     const loadingToast = toast.loading('Actualizando vehículo...');
-    
+
     try {
       console.log('✏️ Editando vehículo:', vehicleData);
-      
+
       const productData = {
         nombre: vehicleData.nombre || vehicleData.name || editingVehicle.nombre,
         precio: Number(vehicleData.precio || vehicleData.price || editingVehicle.precio),
@@ -344,7 +343,7 @@ const Admin = () => {
       await fetchVehicles();
       setEditingVehicle(null);
       setShowForm(false);
-      
+
       toast.success(`✅ ${productData.nombre} actualizado exitosamente`, {
         id: loadingToast,
         duration: 4000,
@@ -366,14 +365,14 @@ const Admin = () => {
 
   const confirmDelete = async () => {
     if (!vehicleToDelete) return;
-    
+
     const loadingToast = toast.loading('Eliminando vehículo...');
-    
+
     try {
       console.log('🗑️ Eliminando vehículo:', vehicleToDelete._id);
-      
-      const res = await fetch(`${API_URL}/${vehicleToDelete._id}`, { 
-        method: 'DELETE' 
+
+      const res = await fetch(`${API_URL}/${vehicleToDelete._id}`, {
+        method: 'DELETE'
       });
 
       if (!res.ok) {
@@ -382,14 +381,14 @@ const Admin = () => {
       }
 
       console.log('✅ Vehículo eliminado');
-      
+
       await fetchVehicles();
-      
+
       toast.success(`🗑️ ${vehicleToDelete.nombre} eliminado exitosamente`, {
         id: loadingToast,
         duration: 4000,
       });
-      
+
       setVehicleToDelete(null);
     } catch (error) {
       console.error('❌ Error deleting vehicle:', error);
@@ -470,7 +469,7 @@ const Admin = () => {
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
               Panel de Administración
             </h1>
-            
+
             {/* Desktop Buttons */}
             <div className="hidden sm:flex space-x-4">
               <button
@@ -525,6 +524,26 @@ const Admin = () => {
         ) : (
           <>
             {/* Desktop Table */}
+            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-blue-800">
+                    💡 Gestión de Stock
+                  </h3>
+                  <div className="mt-2 text-sm text-blue-700">
+                    <p>
+                      Cuando un cliente presiona "Cotizar", es redirigido a WhatsApp para coordinar la venta.
+                      <strong> Recuerda actualizar manualmente el stock</strong> haciendo clic en el ícono de edición (✏️) después de cada venta coordinada.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
             <div className="hidden md:block">
               <VehicleTable
                 vehicles={vehicles}

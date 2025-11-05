@@ -1,6 +1,6 @@
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Package, MinusCircle } from 'lucide-react';
 
-const VehicleTable = ({ vehicles, onEdit, onDelete }) => {
+const VehicleTable = ({ vehicles, onEdit, onDelete, onReduceStock }) => {
   return (
     <div className="bg-white rounded-lg shadow overflow-hidden">
       <table className="min-w-full divide-y divide-gray-200">
@@ -17,6 +17,9 @@ const VehicleTable = ({ vehicles, onEdit, onDelete }) => {
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Precio
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              Stock
             </th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Acciones
@@ -47,6 +50,27 @@ const VehicleTable = ({ vehicles, onEdit, onDelete }) => {
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                 ${vehicle.precio.toLocaleString()}
               </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center gap-2">
+                  {vehicle.disponible && vehicle.cantidad > 0 ? (
+                    <>
+                      <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800 items-center gap-1">
+                        <Package className="w-3 h-3" />
+                        {vehicle.cantidad} unidades
+                      </span>
+                      {vehicle.cantidad <= 3 && (
+                        <span className="px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                          ⚠️ Stock bajo
+                        </span>
+                      )}
+                    </>
+                  ) : (
+                    <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                      Sin stock
+                    </span>
+                  )}
+                </div>
+              </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <button
                   onClick={() => onEdit(vehicle)}
@@ -59,6 +83,14 @@ const VehicleTable = ({ vehicles, onEdit, onDelete }) => {
                   className="text-red-600 hover:text-red-900"
                 >
                   <Trash2 className="h-4 w-4" />
+                </button>
+                <button
+                  onClick={() => onReduceStock(vehicle._id, vehicle.cantidad)}
+                  disabled={vehicle.cantidad === 0}
+                  className="text-orange-600 hover:text-orange-900 disabled:opacity-30 mr-2"
+                  title="Reducir stock en 1"
+                >
+                  <MinusCircle className="h-4 w-4" />
                 </button>
               </td>
             </tr>

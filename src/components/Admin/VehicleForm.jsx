@@ -7,11 +7,13 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel }) {
     nombre: vehicle?.nombre || '',
     categoria: vehicle?.categoria || 'moto',
     precio: vehicle?.precio || '',
-    cilindrada: vehicle?.cilindrada || '', // ✅ CORREGIDO: ahora lee de vehicle
-    velocidadMax: vehicle?.velocidadMax || '', // ✅ CORREGIDO: ahora lee de vehicle
-    peso: vehicle?.peso || '', // ✅ CORREGIDO: ahora lee de vehicle
+    cilindrada: vehicle?.cilindrada || '',
+    velocidadMax: vehicle?.velocidadMax || '',
+    peso: vehicle?.peso || '',
     descripcion: vehicle?.descripcion || '',
-    imageUrl: vehicle?.imagen || ''
+    imageUrl: vehicle?.imagen || '',
+    disponible: vehicle?.disponible !== undefined ? vehicle.disponible : true, // ✅ AGREGADO
+    cantidad: vehicle?.cantidad || 0 // ✅ AGREGADO
   });
 
   const [imagePreview, setImagePreview] = useState(vehicle?.imagen || null);
@@ -177,6 +179,51 @@ export default function VehicleForm({ vehicle, onSubmit, onCancel }) {
               min="0"
             />
           </div>
+
+          {/* ✅✅✅ NUEVO: Disponibilidad y Cantidad ✅✅✅ */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Disponibilidad */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Disponibilidad</label>
+              <div className="flex items-center space-x-4">
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="disponible"
+                    checked={formData.disponible === true}
+                    onChange={() => setFormData({ ...formData, disponible: true })}
+                    className="w-4 h-4 text-green-600 focus:ring-green-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">Disponible</span>
+                </label>
+                <label className="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    name="disponible"
+                    checked={formData.disponible === false}
+                    onChange={() => setFormData({ ...formData, disponible: false })}
+                    className="w-4 h-4 text-red-600 focus:ring-red-500"
+                  />
+                  <span className="ml-2 text-sm text-gray-700">No disponible</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Cantidad */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Cantidad en Stock</label>
+              <input
+                type="number"
+                required
+                value={formData.cantidad}
+                onChange={(e) => setFormData({ ...formData, cantidad: e.target.value })}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 focus:ring-2 focus:ring-yamaha-blue focus:border-transparent"
+                placeholder="0"
+                min="0"
+              />
+            </div>
+          </div>
+          {/* ✅✅✅ FIN SECCIÓN NUEVA ✅✅✅ */}
 
           {/* Descripción */}
           <div>
