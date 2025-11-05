@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Plus, Edit2, Trash2, Package, DollarSign, TrendingUp, X, Users, Mail, Phone, Bike, ChevronUp, ChevronDown, Settings } from 'lucide-react';
-import toast, { Toaster } from 'react-hot-toast';
 
 const API_URL = 'https://yamaha-store-backend.onrender.com';
 
@@ -39,6 +38,10 @@ const Admin = () => {
     calculateStats();
   }, [products]);
 
+  const showToast = (message, type = 'info') => {
+    console.log(`${type.toUpperCase()}: ${message}`);
+  };
+
   const fetchProducts = async () => {
     try {
       const response = await fetch(`${API_URL}/api/products`, {
@@ -52,7 +55,7 @@ const Admin = () => {
       setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
-      toast.error('Error al cargar productos');
+      showToast('Error al cargar productos', 'error');
     }
   };
 
@@ -69,7 +72,7 @@ const Admin = () => {
       setLeads(data);
     } catch (error) {
       console.error('Error fetching leads:', error);
-      toast.error('Error al cargar contactos');
+      showToast('Error al cargar contactos', 'error');
     }
   };
 
@@ -83,7 +86,7 @@ const Admin = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const loadingToast = toast.loading(editingProduct ? 'Actualizando producto...' : 'Creando producto...');
+    showToast(editingProduct ? 'Actualizando producto...' : 'Creando producto...', 'loading');
 
     try {
       const url = editingProduct
@@ -112,31 +115,22 @@ const Admin = () => {
       });
 
       if (response.ok) {
-        toast.success(editingProduct ? 'Producto actualizado exitosamente' : 'Producto creado exitosamente', {
-          id: loadingToast,
-          duration: 4000,
-        });
+        showToast(editingProduct ? 'Producto actualizado exitosamente' : 'Producto creado exitosamente', 'success');
         fetchProducts();
         closeModal();
       } else {
         const error = await response.json();
-        toast.error(error.message || 'Error al guardar producto', {
-          id: loadingToast,
-          duration: 4000,
-        });
+        showToast(error.message || 'Error al guardar producto', 'error');
       }
     } catch (error) {
       console.error('Error saving product:', error);
-      toast.error('Error de conexión con el servidor', {
-        id: loadingToast,
-        duration: 4000,
-      });
+      showToast('Error de conexión con el servidor', 'error');
     }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('¿Seguro que deseas eliminar este producto?')) {
-      const loadingToast = toast.loading('Eliminando producto...');
+      showToast('Eliminando producto...', 'loading');
 
       try {
         const response = await fetch(`${API_URL}/api/products/${id}`, {
@@ -145,27 +139,21 @@ const Admin = () => {
         });
 
         if (response.ok) {
-          toast.success('Producto eliminado exitosamente', {
-            id: loadingToast,
-            duration: 4000,
-          });
+          showToast('Producto eliminado exitosamente', 'success');
           fetchProducts();
         } else {
           throw new Error('Error al eliminar');
         }
       } catch (error) {
         console.error('Error deleting product:', error);
-        toast.error('Error al eliminar producto', {
-          id: loadingToast,
-          duration: 4000,
-        });
+        showToast('Error al eliminar producto', 'error');
       }
     }
   };
 
   const handleDeleteLead = async (id) => {
     if (window.confirm('¿Seguro que deseas eliminar este contacto?')) {
-      const loadingToast = toast.loading('Eliminando contacto...');
+      showToast('Eliminando contacto...', 'loading');
 
       try {
         const response = await fetch(`${API_URL}/api/leads/${id}`, {
@@ -174,20 +162,14 @@ const Admin = () => {
         });
 
         if (response.ok) {
-          toast.success('Contacto eliminado exitosamente', {
-            id: loadingToast,
-            duration: 4000,
-          });
+          showToast('Contacto eliminado exitosamente', 'success');
           fetchLeads();
         } else {
           throw new Error('Error al eliminar');
         }
       } catch (error) {
         console.error('Error deleting lead:', error);
-        toast.error('Error al eliminar contacto', {
-          id: loadingToast,
-          duration: 4000,
-        });
+        showToast('Error al eliminar contacto', 'error');
       }
     }
   };
@@ -198,7 +180,7 @@ const Admin = () => {
 
     const newQuantity = Math.max(0, (product.cantidad || 0) + change);
 
-    const loadingToast = toast.loading('Actualizando stock...');
+    showToast('Actualizando stock...', 'loading');
 
     try {
       const response = await fetch(`${API_URL}/api/products/${productId}`, {
@@ -211,20 +193,14 @@ const Admin = () => {
       });
 
       if (response.ok) {
-        toast.success('Stock actualizado', {
-          id: loadingToast,
-          duration: 2000,
-        });
+        showToast('Stock actualizado', 'success');
         fetchProducts();
       } else {
         throw new Error('Error al actualizar stock');
       }
     } catch (error) {
       console.error('Error updating stock:', error);
-      toast.error('Error al actualizar stock', {
-        id: loadingToast,
-        duration: 4000,
-      });
+      showToast('Error al actualizar stock', 'error');
     }
   };
 
@@ -283,39 +259,6 @@ const Admin = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-6 px-4 sm:px-6">
-      <Toaster
-        position="top-right"
-        reverseOrder={false}
-        toastOptions={{
-          duration: 4000,
-          style: {
-            background: '#1f2937',
-            color: '#fff',
-            fontWeight: '500',
-          },
-          success: {
-            duration: 4000,
-            iconTheme: {
-              primary: '#10b981',
-              secondary: '#fff',
-            },
-          },
-          error: {
-            duration: 5000,
-            iconTheme: {
-              primary: '#ef4444',
-              secondary: '#fff',
-            },
-          },
-          loading: {
-            iconTheme: {
-              primary: '#3b82f6',
-              secondary: '#fff',
-            },
-          },
-        }}
-      />
-
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 sm:mb-8">
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -343,8 +286,7 @@ const Admin = () => {
           >
             <div className="flex items-center gap-2">
               <Package className="w-4 h-4 sm:w-5 sm:h-5" />
-              <span className="hidden sm:inline">Productos</span>
-              <span className="sm:hidden">Productos</span>
+              <span>Productos</span>
             </div>
           </button>
           <button
@@ -595,134 +537,166 @@ const Admin = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {activeTab === 'leads' && (
-                <>
-                  <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
-                      <input
-                        type="text"
-                        placeholder="Buscar por nombre, email o vehículo..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                    {filteredLeads.map((lead) => (
-                      <div key={lead._id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-4 sm:p-6">
-                        {/* Header con imagen y nombre del vehículo */}
-                        <div className="flex items-start gap-4 mb-4 pb-4 border-b border-gray-200">
-                          {lead.vehiculoImagen && (
-                            <img
-                              src={lead.vehiculoImagen}
-                              alt={lead.vehiculo}
-                              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg flex-shrink-0"
-                              onError={(e) => {
-                                e.target.src = 'https://res.cloudinary.com/dbqapcw0r/image/upload/w_800,h_600,c_fill,g_center,q_auto,f_auto/moto.jpg';
-                              }}
-                            />
-                          )}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-start justify-between gap-2">
-                              <div className="flex-1 min-w-0">
-                                <h3 className="font-bold text-gray-900 text-sm sm:text-base mb-1 break-words">
-                                  {lead.vehiculo}
-                                </h3>
-                                {lead.vehiculoPrecio > 0 && (
-                                  <p className="text-lg sm:text-xl font-bold text-yamaha-blue">
-                                    ${lead.vehiculoPrecio.toLocaleString()}
-                                  </p>
-                                )}
-                                {lead.vehiculoCilindrada > 0 && (
-                                  <p className="text-xs text-gray-500 mt-1">
-                                    {lead.vehiculoCilindrada} cc
-                                  </p>
-                                )}
-                              </div>
-                              <button
-                                onClick={() => handleDeleteLead(lead._id)}
-                                className="text-red-500 hover:text-red-700 flex-shrink-0"
-                              >
-                                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Información del cliente */}
-                        <div className="space-y-2 sm:space-y-3">
-                          <div className="flex items-center gap-3 text-xs sm:text-sm">
-                            <Users className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
-                            <span className="text-gray-700 font-medium">{lead.nombre}</span>
-                          </div>
-
-                          {lead.email && (
-                            <div className="flex items-center gap-3 text-xs sm:text-sm">
-                              <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
-                              <a
-                                href={`mailto:${lead.email}`}
-                                className="text-blue-600 hover:underline truncate"
-                              >
-                                {lead.email}
-                              </a>
-                            </div>
-                          )}
-
-                          <div className="flex items-center gap-3 text-xs sm:text-sm">
-                            <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
-                            <a
-                              href={`tel:${lead.telefono}`}
-                              className="text-blue-600 hover:underline"
-                            >
-                              {lead.telefono}
-                            </a>
-                          </div>
-                        </div>
-
-                        {/* Mensaje */}
-                        {lead.mensaje && (
-                          <div className="mt-4 pt-4 border-t border-gray-200">
-                            <p className="text-xs text-gray-500 mb-1">Mensaje:</p>
-                            <p className="text-xs sm:text-sm text-gray-700 break-words">{lead.mensaje}</p>
+            <div className="space-y-4">
+              {filteredLeads.map((lead) => (
+                <div key={lead._id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow overflow-hidden">
+                  <div className="flex flex-col lg:flex-row">
+                    {/* Sección del Producto - Izquierda */}
+                    <div className="lg:w-1/3 bg-gradient-to-br from-blue-50 to-blue-100 p-6 border-r border-blue-200">
+                      <div className="flex items-center gap-2 mb-4">
+                        <Bike className="w-5 h-5 text-blue-600" />
+                        <h3 className="font-bold text-blue-900 text-lg">Producto de Interés</h3>
+                      </div>
+                      
+                      {lead.vehiculoImagen && (
+                        <img
+                          src={lead.vehiculoImagen}
+                          alt={lead.vehiculo}
+                          className="w-full h-48 object-cover rounded-lg mb-4 shadow-md"
+                          onError={(e) => {
+                            e.target.src = 'https://res.cloudinary.com/dbqapcw0r/image/upload/w_800,h_600,c_fill,g_center,q_auto,f_auto/moto.jpg';
+                          }}
+                        />
+                      )}
+                      
+                      <h4 className="font-bold text-gray-900 text-xl mb-3">{lead.vehiculo}</h4>
+                      
+                      <div className="space-y-2">
+                        {lead.vehiculoPrecio > 0 && (
+                          <div className="flex items-center justify-between bg-white rounded-lg p-3">
+                            <span className="text-sm text-gray-600">Precio:</span>
+                            <span className="text-lg font-bold text-blue-600">
+                              ${lead.vehiculoPrecio.toLocaleString()}
+                            </span>
                           </div>
                         )}
+                        
+                        {lead.vehiculoCilindrada > 0 && (
+                          <div className="flex items-center justify-between bg-white rounded-lg p-3">
+                            <span className="text-sm text-gray-600">Cilindrada:</span>
+                            <span className="font-semibold text-gray-900">
+                              {lead.vehiculoCilindrada} cc
+                            </span>
+                          </div>
+                        )}
+                        
+                        {lead.vehiculoCategoria && (
+                          <div className="flex items-center justify-between bg-white rounded-lg p-3">
+                            <span className="text-sm text-gray-600">Categoría:</span>
+                            <span className="font-semibold text-gray-900">
+                              {lead.vehiculoCategoria}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
 
-                        {/* Fecha */}
-                        <div className="mt-4 text-xs text-gray-400">
-                          {new Date(lead.createdAt).toLocaleDateString('es-AR', {
+                    {/* Sección de Información del Cliente - Derecha */}
+                    <div className="lg:w-2/3 p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="font-bold text-gray-900 text-lg">Información del Cliente</h3>
+                        <button
+                          onClick={() => handleDeleteLead(lead._id)}
+                          className="text-red-500 hover:text-red-700 hover:bg-red-50 p-2 rounded-lg transition"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div className="space-y-3">
+                          <div className="flex items-start gap-3">
+                            <Users className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-xs text-gray-500 mb-0.5">Nombre completo</p>
+                              <p className="text-sm font-semibold text-gray-900">{lead.nombre}</p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3">
+                            <Mail className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-xs text-gray-500 mb-0.5">Email</p>
+                              <a
+                                href={`mailto:${lead.email}`}
+                                className="text-sm text-blue-600 hover:underline break-all"
+                              >
+                                {lead.email || 'No proporcionado'}
+                              </a>
+                            </div>
+                          </div>
+
+                          <div className="flex items-start gap-3">
+                            <Phone className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                            <div>
+                              <p className="text-xs text-gray-500 mb-0.5">Teléfono</p>
+                              <a
+                                href={`tel:${lead.telefono}`}
+                                className="text-sm text-blue-600 hover:underline"
+                              >
+                                {lead.telefono}
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3">
+                          {lead.ciudad && (
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 mb-0.5">Ciudad</p>
+                              <p className="text-sm font-medium text-gray-900">{lead.ciudad}</p>
+                            </div>
+                          )}
+                          
+                          {lead.provincia && (
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 mb-0.5">Provincia</p>
+                              <p className="text-sm font-medium text-gray-900">{lead.provincia}</p>
+                            </div>
+                          )}
+                          
+                          {lead.codigoPostal && (
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <p className="text-xs text-gray-500 mb-0.5">Código Postal</p>
+                              <p className="text-sm font-medium text-gray-900">{lead.codigoPostal}</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Mensaje del cliente */}
+                      {lead.mensaje && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                          <p className="text-xs text-gray-500 mb-2 font-semibold">Mensaje del cliente:</p>
+                          <p className="text-sm text-gray-700 leading-relaxed">{lead.mensaje}</p>
+                        </div>
+                      )}
+
+                      {/* Fecha de registro */}
+                      <div className="mt-4 pt-4 border-t border-gray-200">
+                        <p className="text-xs text-gray-400">
+                          Registrado el {new Date(lead.createdAt).toLocaleDateString('es-AR', {
                             year: 'numeric',
                             month: 'long',
                             day: 'numeric',
                             hour: '2-digit',
                             minute: '2-digit'
                           })}
-                        </div>
+                        </p>
                       </div>
-                    ))}
-                  </div>
-
-                  {filteredLeads.length === 0 && (
-                    <div className="bg-white rounded-lg shadow p-8 sm:p-12 text-center">
-                      <Users className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
-                      <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No hay contactos aún</h3>
-                      <p className="text-sm sm:text-base text-gray-500">Los clientes que completen el formulario de cotización aparecerán aquí.</p>
                     </div>
-                  )}
-                </>
+                  </div>
+                </div>
+              ))}
+
+              {filteredLeads.length === 0 && (
+                <div className="bg-white rounded-lg shadow p-12 text-center">
+                  <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No hay contactos aún</h3>
+                  <p className="text-base text-gray-500">Los clientes que completen el formulario de cotización aparecerán aquí.</p>
+                </div>
               )}
             </div>
-
-            {filteredLeads.length === 0 && (
-              <div className="bg-white rounded-lg shadow p-8 sm:p-12 text-center">
-                <Users className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No hay contactos aún</h3>
-                <p className="text-sm sm:text-base text-gray-500">Los clientes que completen el formulario de cotización aparecerán aquí.</p>
-              </div>
-            )}
           </>
         )}
       </div>
