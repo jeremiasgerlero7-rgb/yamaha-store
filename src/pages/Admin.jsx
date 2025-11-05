@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, Package, DollarSign, TrendingUp, X, Users, Mail, Phone, Bike } from 'lucide-react';
+import { Search, Plus, Edit2, Trash2, Package, DollarSign, TrendingUp, X, Users, Mail, Phone, Bike, ChevronUp, ChevronDown, Settings } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 const API_URL = 'https://yamaha-store-backend.onrender.com';
 
@@ -51,7 +52,7 @@ const Admin = () => {
       setProducts(data);
     } catch (error) {
       console.error('Error fetching products:', error);
-      alert('Error al cargar productos. Verifica la conexión con el servidor.');
+      toast.error('Error al cargar productos');
     }
   };
 
@@ -68,6 +69,7 @@ const Admin = () => {
       setLeads(data);
     } catch (error) {
       console.error('Error fetching leads:', error);
+      toast.error('Error al cargar contactos');
     }
   };
 
@@ -80,6 +82,8 @@ const Admin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    const loadingToast = toast.loading(editingProduct ? 'Actualizando producto...' : 'Creando producto...');
     
     try {
       const url = editingProduct 
@@ -108,21 +112,32 @@ const Admin = () => {
       });
 
       if (response.ok) {
-        alert(editingProduct ? 'Producto actualizado' : 'Producto creado');
+        toast.success(editingProduct ? 'Producto actualizado exitosamente' : 'Producto creado exitosamente', {
+          id: loadingToast,
+          duration: 4000,
+        });
         fetchProducts();
         closeModal();
       } else {
         const error = await response.json();
-        alert(error.message || 'Error al guardar producto');
+        toast.error(error.message || 'Error al guardar producto', {
+          id: loadingToast,
+          duration: 4000,
+        });
       }
     } catch (error) {
       console.error('Error saving product:', error);
-      alert('Error de conexión. Verifica la conexión con el servidor.');
+      toast.error('Error de conexión con el servidor', {
+        id: loadingToast,
+        duration: 4000,
+      });
     }
   };
 
   const handleDelete = async (id) => {
     if (window.confirm('¿Seguro que deseas eliminar este producto?')) {
+      const loadingToast = toast.loading('Eliminando producto...');
+      
       try {
         const response = await fetch(`${API_URL}/api/products/${id}`, {
           method: 'DELETE',
@@ -130,20 +145,28 @@ const Admin = () => {
         });
 
         if (response.ok) {
-          alert('Producto eliminado');
+          toast.success('Producto eliminado exitosamente', {
+            id: loadingToast,
+            duration: 4000,
+          });
           fetchProducts();
         } else {
           throw new Error('Error al eliminar');
         }
       } catch (error) {
         console.error('Error deleting product:', error);
-        alert('Error al eliminar producto.');
+        toast.error('Error al eliminar producto', {
+          id: loadingToast,
+          duration: 4000,
+        });
       }
     }
   };
 
   const handleDeleteLead = async (id) => {
     if (window.confirm('¿Seguro que deseas eliminar este contacto?')) {
+      const loadingToast = toast.loading('Eliminando contacto...');
+      
       try {
         const response = await fetch(`${API_URL}/api/leads/${id}`, {
           method: 'DELETE',
@@ -151,15 +174,57 @@ const Admin = () => {
         });
 
         if (response.ok) {
-          alert('Contacto eliminado');
+          toast.success('Contacto eliminado exitosamente', {
+            id: loadingToast,
+            duration: 4000,
+          });
           fetchLeads();
         } else {
           throw new Error('Error al eliminar');
         }
       } catch (error) {
         console.error('Error deleting lead:', error);
-        alert('Error al eliminar contacto.');
+        toast.error('Error al eliminar contacto', {
+          id: loadingToast,
+          duration: 4000,
+        });
       }
+    }
+  };
+
+  const handleStockChange = async (productId, change) => {
+    const product = products.find(p => p._id === productId);
+    if (!product) return;
+    
+    const newQuantity = Math.max(0, (product.cantidad || 0) + change);
+    
+    const loadingToast = toast.loading('Actualizando stock...');
+    
+    try {
+      const response = await fetch(`${API_URL}/api/products/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...product,
+          cantidad: newQuantity
+        })
+      });
+
+      if (response.ok) {
+        toast.success('Stock actualizado', {
+          id: loadingToast,
+          duration: 2000,
+        });
+        fetchProducts();
+      } else {
+        throw new Error('Error al actualizar stock');
+      }
+    } catch (error) {
+      console.error('Error updating stock:', error);
+      toast.error('Error al actualizar stock', {
+        id: loadingToast,
+        duration: 4000,
+      });
     }
   };
 
@@ -212,105 +277,156 @@ const Admin = () => {
     lead.vehiculo?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  const navigateToUsers = () => {
+    window.location.href = '/users';
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 pt-20 pb-6 px-4 sm:px-6">
+      <Toaster
+        position="top-right"
+        reverseOrder={false}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#1f2937',
+            color: '#fff',
+            fontWeight: '500',
+          },
+          success: {
+            duration: 4000,
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            duration: 5000,
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+          loading: {
+            iconTheme: {
+              primary: '#3b82f6',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+
       <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel de Administración</h1>
-          <p className="text-gray-600">Gestiona tu inventario y posibles ventas</p>
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Panel de Administración</h1>
+          <p className="text-sm sm:text-base text-gray-600">Gestiona tu inventario y posibles ventas</p>
         </div>
 
-        <div className="flex gap-4 mb-8 border-b border-gray-200">
+        <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8 border-b border-gray-200 overflow-x-auto">
           <button
             onClick={() => setActiveTab('products')}
-            className={`pb-4 px-4 font-medium transition-colors relative ${
+            className={`pb-3 sm:pb-4 px-3 sm:px-4 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${
               activeTab === 'products'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             <div className="flex items-center gap-2">
-              <Package className="w-5 h-5" />
-              Productos
+              <Package className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Productos</span>
+              <span className="sm:hidden">Productos</span>
             </div>
           </button>
           <button
             onClick={() => setActiveTab('leads')}
-            className={`pb-4 px-4 font-medium transition-colors relative ${
+            className={`pb-3 sm:pb-4 px-3 sm:px-4 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${
               activeTab === 'leads'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
             <div className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              Posibles Ventas
+              <Users className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Posibles Ventas</span>
+              <span className="sm:hidden">Ventas</span>
               {leads.length > 0 && (
-                <span className="bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+                <span className="bg-red-500 text-white text-xs rounded-full px-1.5 sm:px-2 py-0.5">
                   {leads.length}
                 </span>
               )}
+            </div>
+          </button>
+          <button
+            onClick={navigateToUsers}
+            className="pb-3 sm:pb-4 px-3 sm:px-4 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base text-gray-500 hover:text-gray-700"
+          >
+            <div className="flex items-center gap-2">
+              <Settings className="w-4 h-4 sm:w-5 sm:h-5" />
+              <span className="hidden sm:inline">Administrar Usuarios</span>
+              <span className="sm:hidden">Usuarios</span>
             </div>
           </button>
         </div>
 
         {activeTab === 'products' && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow p-6">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Total Productos</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Total Productos</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
                   </div>
-                  <Package className="w-12 h-12 text-blue-500" />
+                  <Package className="w-10 h-10 sm:w-12 sm:h-12 text-blue-500" />
                 </div>
               </div>
               
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Valor Total</p>
-                    <p className="text-2xl font-bold text-gray-900">${stats.totalValue.toLocaleString()}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Valor Total</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">${stats.totalValue.toLocaleString()}</p>
                   </div>
-                  <DollarSign className="w-12 h-12 text-green-500" />
+                  <DollarSign className="w-10 h-10 sm:w-12 sm:h-12 text-green-500" />
                 </div>
               </div>
               
-              <div className="bg-white rounded-lg shadow p-6">
+              <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-600">Stock Bajo</p>
-                    <p className="text-2xl font-bold text-gray-900">{stats.lowStock}</p>
+                    <p className="text-xs sm:text-sm text-gray-600">Stock Bajo</p>
+                    <p className="text-xl sm:text-2xl font-bold text-gray-900">{stats.lowStock}</p>
                   </div>
-                  <TrendingUp className="w-12 h-12 text-orange-500" />
+                  <TrendingUp className="w-10 h-10 sm:w-12 sm:h-12 text-orange-500" />
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
-              <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-stretch sm:items-center">
                 <div className="relative flex-1 w-full">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                   <input
                     type="text"
                     placeholder="Buscar productos..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
                 <button
                   onClick={() => openModal()}
-                  className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+                  className="flex items-center justify-center gap-2 bg-blue-600 text-white px-4 sm:px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap text-sm sm:text-base"
                 >
-                  <Plus className="w-5 h-5" />
-                  Nuevo Producto
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="hidden sm:inline">Nuevo Producto</span>
+                  <span className="sm:hidden">Nuevo</span>
                 </button>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow overflow-hidden">
+            {/* Desktop Table */}
+            <div className="hidden lg:block bg-white rounded-lg shadow overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead className="bg-gray-50 border-b border-gray-200">
@@ -343,11 +459,25 @@ const Admin = () => {
                           ${product.precio?.toLocaleString()}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            (product.cantidad || 0) < 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                          }`}>
-                            {product.cantidad || 0} unidades
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => handleStockChange(product._id, -1)}
+                              className="p-1 rounded bg-red-100 hover:bg-red-200 text-red-600 transition"
+                            >
+                              <ChevronDown className="w-4 h-4" />
+                            </button>
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                              (product.cantidad || 0) < 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                            }`}>
+                              {product.cantidad || 0}
+                            </span>
+                            <button
+                              onClick={() => handleStockChange(product._id, 1)}
+                              className="p-1 rounded bg-green-100 hover:bg-green-200 text-green-600 transition"
+                            >
+                              <ChevronUp className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
@@ -376,55 +506,121 @@ const Admin = () => {
                 </table>
               </div>
             </div>
+
+            {/* Mobile Cards */}
+            <div className="lg:hidden space-y-4">
+              {filteredProducts.map((product) => (
+                <div key={product._id} className="bg-white rounded-lg shadow p-4">
+                  <div className="flex gap-3 mb-3">
+                    <img src={product.imagen} alt={product.nombre} className="w-16 h-16 rounded-lg object-cover flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-gray-900 truncate text-sm">{product.nombre}</h3>
+                      <p className="text-lg font-bold text-gray-900">${product.precio?.toLocaleString()}</p>
+                      <span className="inline-block px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800 mt-1">
+                        {product.categoria}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-3 pb-3 border-b">
+                    <span className="text-sm text-gray-600">Stock:</span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() => handleStockChange(product._id, -1)}
+                        className="p-1.5 rounded bg-red-100 hover:bg-red-200 text-red-600 transition"
+                      >
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
+                        (product.cantidad || 0) < 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                      }`}>
+                        {product.cantidad || 0}
+                      </span>
+                      <button
+                        onClick={() => handleStockChange(product._id, 1)}
+                        className="p-1.5 rounded bg-green-100 hover:bg-green-200 text-green-600 transition"
+                      >
+                        <ChevronUp className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm text-gray-600">Disponible:</span>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      product.disponible ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {product.disponible ? 'Sí' : 'No'}
+                    </span>
+                  </div>
+                  
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => openModal(product)}
+                      className="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDelete(product._id)}
+                      className="flex items-center justify-center gap-2 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition text-sm"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </>
         )}
 
         {activeTab === 'leads' && (
           <>
-            <div className="bg-white rounded-lg shadow p-6 mb-6">
+            <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                 <input
                   type="text"
                   placeholder="Buscar por nombre, email o vehículo..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {filteredLeads.map((lead) => (
-                <div key={lead._id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
+                <div key={lead._id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 sm:p-6">
                   <div className="flex justify-between items-start mb-4">
                     <div className="flex items-center gap-2">
-                      <Bike className="w-8 h-8 text-blue-600" />
-                      <span className="font-semibold text-gray-900">{lead.vehiculo}</span>
+                      <Bike className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+                      <span className="font-semibold text-gray-900 text-sm sm:text-base">{lead.vehiculo}</span>
                     </div>
                     <button
                       onClick={() => handleDeleteLead(lead._id)}
                       className="text-red-500 hover:text-red-700"
                     >
-                      <Trash2 className="w-5 h-5" />
+                      <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
                     </button>
                   </div>
                   
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3 text-sm">
-                      <Users className="w-4 h-4 text-gray-400" />
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex items-center gap-3 text-xs sm:text-sm">
+                      <Users className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                       <span className="text-gray-700">{lead.nombre} {lead.apellido}</span>
                     </div>
                     
-                    <div className="flex items-center gap-3 text-sm">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <a href={`mailto:${lead.email}`} className="text-blue-600 hover:underline">
+                    <div className="flex items-center gap-3 text-xs sm:text-sm">
+                      <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
+                      <a href={`mailto:${lead.email}`} className="text-blue-600 hover:underline truncate">
                         {lead.email}
                       </a>
                     </div>
                     
-                    <div className="flex items-center gap-3 text-sm">
-                      <Phone className="w-4 h-4 text-gray-400" />
+                    <div className="flex items-center gap-3 text-xs sm:text-sm">
+                      <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                       <a href={`tel:${lead.telefono}`} className="text-blue-600 hover:underline">
                         {lead.telefono}
                       </a>
@@ -434,7 +630,7 @@ const Admin = () => {
                   {lead.mensaje && (
                     <div className="mt-4 pt-4 border-t border-gray-200">
                       <p className="text-xs text-gray-500 mb-1">Mensaje:</p>
-                      <p className="text-sm text-gray-700">{lead.mensaje}</p>
+                      <p className="text-xs sm:text-sm text-gray-700">{lead.mensaje}</p>
                     </div>
                   )}
                   
@@ -452,10 +648,10 @@ const Admin = () => {
             </div>
 
             {filteredLeads.length === 0 && (
-              <div className="bg-white rounded-lg shadow p-12 text-center">
-                <Users className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No hay contactos aún</h3>
-                <p className="text-gray-500">Los clientes que completen el formulario de cotización aparecerán aquí.</p>
+              <div className="bg-white rounded-lg shadow p-8 sm:p-12 text-center">
+                <Users className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No hay contactos aún</h3>
+                <p className="text-sm sm:text-base text-gray-500">Los clientes que completen el formulario de cotización aparecerán aquí.</p>
               </div>
             )}
           </>
@@ -464,110 +660,113 @@ const Admin = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6">
+            <div className="flex justify-between items-center mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900">
                 {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
               </h2>
               <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
-                <X className="w-6 h-6" />
+                <X className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
             </div>
 
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Nombre del Producto</label>
                 <input
                   type="text"
                   value={formData.nombre}
                   onChange={(e) => setFormData({...formData, nombre: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Descripción</label>
                 <textarea
                   value={formData.descripcion}
                   onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Precio</label>
                   <input
                     type="number"
                     step="0.01"
                     value={formData.precio}
                     onChange={(e) => setFormData({...formData, precio: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Categoría</label>
                   <input
                     type="text"
                     value={formData.categoria}
                     onChange={(e) => setFormData({...formData, categoria: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    required
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-3 gap-2 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Cilindrada (cc)</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Cilindrada (cc)</label>
                   <input
                     type="number"
                     value={formData.cilindrada}
                     onChange={(e) => setFormData({...formData, cilindrada: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Velocidad Máx</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Velocidad Máx</label>
                   <input
                     type="number"
                     value={formData.velocidadMax}
                     onChange={(e) => setFormData({...formData, velocidadMax: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Peso (kg)</label>
                   <input
                     type="number"
                     value={formData.peso}
                     onChange={(e) => setFormData({...formData, peso: e.target.value})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-2 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Cantidad en Stock</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Cantidad en Stock</label>
                   <input
                     type="number"
                     min="0"
                     value={formData.cantidad}
                     onChange={(e) => setFormData({...formData, cantidad: parseInt(e.target.value) || 0})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Disponible</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Disponible</label>
                   <select
                     value={formData.disponible}
                     onChange={(e) => setFormData({...formData, disponible: e.target.value === 'true'})}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="true">Sí</option>
                     <option value="false">No</option>
@@ -576,41 +775,42 @@ const Admin = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">URL de la Imagen</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">URL de la Imagen</label>
                 <input
                   type="url"
                   value={formData.imageUrl}
                   onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
 
               {formData.imageUrl && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Vista Previa</label>
+                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Vista Previa</label>
                   <img 
                     src={formData.imageUrl} 
                     alt="Preview" 
-                    className="w-32 h-32 object-cover rounded-lg"
+                    className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-lg"
                   />
                 </div>
               )}
 
-              <div className="flex gap-4 pt-4">
+              <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
                 <button
-                  onClick={handleSubmit}
-                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                  type="submit"
+                  className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium"
                 >
                   {editingProduct ? 'Actualizar' : 'Crear'} Producto
                 </button>
                 <button
+                  type="button"
                   onClick={closeModal}
-                  className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+                  className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors text-sm sm:text-base font-medium"
                 >
                   Cancelar
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
