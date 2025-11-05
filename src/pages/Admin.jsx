@@ -1,583 +1,536 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import VehicleTable from '../components/Admin/VehicleTable';
-import VehicleForm from '../components/Admin/VehicleForm';
-import { Plus, Users, X, Camera, Upload, Edit2, Trash2, MoreVertical } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Plus, Edit2, Trash2, Package, DollarSign, TrendingUp, X } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
-import { useAuth } from '../context/AuthContext';
-import OptimizedImage from '../components/OptimizedImage';
-
-const API_URL = `${import.meta.env.VITE_API_URL}/products`;
-
-// Modal de confirmación personalizado - RESPONSIVE
-const DeleteConfirmModal = ({ vehicle, onConfirm, onCancel }) => {
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-4 sm:p-6 animate-fadeIn">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg sm:text-xl font-bold text-gray-900">Confirmar Eliminación</h3>
-          <button
-            onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600 transition"
-          >
-            <X className="h-5 w-5 sm:h-6 sm:w-6" />
-          </button>
-        </div>
-
-        <div className="mb-6">
-          <p className="text-sm sm:text-base text-gray-600 mb-4">
-            ¿Estás seguro que quieres eliminar este vehículo?
-          </p>
-
-          <div className="border rounded-lg p-3 sm:p-4 bg-gray-50">
-            <div className="flex items-center space-x-3 sm:space-x-4">
-              <OptimizedImage
-                src={vehicle.imagen}
-                alt={vehicle.nombre}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg flex-shrink-0"
-              />
-              <div className="flex-1 min-w-0">
-                <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
-                  {vehicle.nombre}
-                </h4>
-                <p className="text-xs sm:text-sm text-gray-500 capitalize">{vehicle.categoria}</p>
-                <p className="text-xs sm:text-sm font-medium text-blue-600">
-                  ${vehicle.precio?.toLocaleString('es-AR')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-          <button
-            onClick={onCancel}
-            className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition font-medium text-sm sm:text-base"
-          >
-            Cancelar
-          </button>
-          <button
-            onClick={onConfirm}
-            className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition font-medium text-sm sm:text-base"
-          >
-            Eliminar
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// Notificación de bienvenida - RESPONSIVE
-const WelcomeNotification = ({ user, onClose, onUploadPhoto }) => {
-  const [show, setShow] = useState(true);
-
-  useEffect(() => {
-    const shouldShow = localStorage.getItem('showWelcomeNotification');
-    if (user.isGoogleAuth || !shouldShow) {
-      setShow(false);
-    }
-  }, [user]);
-
-  if (!show) return null;
-
-  const handleClose = () => {
-    setShow(false);
-    localStorage.removeItem('showWelcomeNotification');
-    onClose?.();
-  };
-
-  return (
-    <div className="fixed top-16 sm:top-20 left-4 right-4 sm:left-auto sm:right-4 max-w-md bg-white rounded-lg shadow-2xl border-2 border-blue-200 p-4 sm:p-6 z-50 animate-slideIn">
-      <button
-        onClick={handleClose}
-        className="absolute top-2 right-2 sm:top-3 sm:right-3 text-gray-400 hover:text-gray-600 transition"
-      >
-        <X size={18} className="sm:w-5 sm:h-5" />
-      </button>
-
-      <div className="flex items-start gap-3 sm:gap-4">
-        <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-full flex items-center justify-center">
-          <Camera className="text-blue-600" size={20} />
-        </div>
-
-        <div className="flex-1">
-          <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-2">
-            ¡Bienvenido, {user.name}! 👋
-          </h3>
-
-          <p className="text-xs sm:text-sm text-gray-600 mb-4">
-            Como no iniciaste sesión con Google, tienes una foto de perfil predeterminada.
-            Pero no te preocupes, <strong>puedes personalizarla cuando quieras</strong>.
-          </p>
-
-          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-            <button
-              onClick={() => {
-                handleClose();
-                onUploadPhoto?.();
-              }}
-              className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-xs sm:text-sm font-medium"
-            >
-              <Upload size={14} />
-              Subir foto ahora
-            </button>
-
-            <button
-              onClick={handleClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition text-xs sm:text-sm font-medium"
-            >
-              Más tarde
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// ⭐ NUEVO: Vista Mobile de Cards con Acciones
-const MobileVehicleCards = ({ vehicles, onEdit, onDelete }) => {
-  const [openMenuId, setOpenMenuId] = useState(null);
-
-  return (
-    <div className="md:hidden space-y-4">
-      {vehicles.map((vehicle) => (
-        <div
-          key={vehicle._id}
-          className="bg-white rounded-lg shadow-md overflow-hidden"
-        >
-          {/* Imagen del Vehículo */}
-          <div className="relative h-48 bg-gray-200">
-            <OptimizedImage
-              src={vehicle.imagen}
-              alt={vehicle.nombre}
-              className="w-full h-48"
-            />
-            <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full ${vehicle.disponible
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
-              }`}>
-              {vehicle.disponible ? 'Disponible' : 'No disponible'}
-            </span>
-          </div>
-
-          {/* Información y Acciones */}
-          <div className="p-4">
-            <div className="flex items-start justify-between mb-3">
-              <div className="flex-1 min-w-0">
-                <h3 className="text-lg font-bold text-gray-900 truncate mb-1">
-                  {vehicle.nombre}
-                </h3>
-                <p className="text-sm text-gray-500 capitalize mb-2">
-                  {vehicle.categoria}
-                </p>
-                <p className="text-xl font-bold text-blue-600">
-                  ${vehicle.precio?.toLocaleString('es-AR')}
-                </p>
-              </div>
-            </div>
-
-            {/* Especificaciones en Grid */}
-            <div className="grid grid-cols-3 gap-2 mb-4 py-3 border-t border-b">
-              <div className="text-center">
-                <p className="text-xs text-gray-500">Cilindrada</p>
-                <p className="text-sm font-semibold text-gray-900">{vehicle.cilindrada}</p>
-              </div>
-              <div className="text-center border-l border-r">
-                <p className="text-xs text-gray-500">Vel. Máx</p>
-                <p className="text-sm font-semibold text-gray-900">{vehicle.velocidadMax}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-xs text-gray-500">Peso</p>
-                <p className="text-sm font-semibold text-gray-900">{vehicle.peso}</p>
-              </div>
-            </div>
-
-            {/* Botones de Acción */}
-            <div className="flex gap-2">
-              <button
-                onClick={() => onEdit(vehicle)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
-              >
-                <Edit2 className="h-4 w-4" />
-                <span>Editar</span>
-              </button>
-              <button
-                onClick={() => onDelete(vehicle._id)}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
-              >
-                <Trash2 className="h-4 w-4" />
-                <span>Eliminar</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
 
 const Admin = () => {
-  const navigate = useNavigate();
-  const { currentUser } = useAuth();
-  const [vehicles, setVehicles] = useState([]);
-  const [showForm, setShowForm] = useState(false);
-  const [editingVehicle, setEditingVehicle] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [vehicleToDelete, setVehicleToDelete] = useState(null);
-  const [showWelcome, setShowWelcome] = useState(false);
-  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [products, setProducts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState(null);
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    totalValue: 0,
+    lowStock: 0
+  });
+
+  const [formData, setFormData] = useState({
+    nombre: '',
+    descripcion: '',
+    precio: '',
+    categoria: '',
+    imageUrl: '',
+    cilindrada: '',
+    velocidadMax: '',
+    peso: '',
+    cantidad: 0,
+    disponible: true
+  });
 
   useEffect(() => {
-    fetchVehicles();
+    fetchProducts();
+  }, []);
 
-    const shouldShowWelcome = localStorage.getItem('showWelcomeNotification');
-    if (shouldShowWelcome === 'true' && currentUser && !currentUser.isGoogleAuth) {
-      setShowWelcome(true);
-    }
-  }, [currentUser]);
+  useEffect(() => {
+    calculateStats();
+  }, [products]);
 
-  const fetchVehicles = async () => {
+  const fetchProducts = async () => {
     try {
-      const res = await fetch(API_URL);
-      if (!res.ok) throw new Error('Error al cargar vehículos');
-      const data = await res.json();
-      setVehicles(data);
+      const response = await fetch('/api/products');
+      const data = await response.json();
+      setProducts(data);
     } catch (error) {
-      console.error('Error fetching vehicles:', error);
-      toast.error('Error al cargar vehículos');
-    } finally {
-      setLoading(false);
+      toast.error('Error al cargar productos');
     }
   };
 
-  const handleAddVehicle = async (data) => {
-    const loadingToast = toast.loading('Subiendo imagen y creando vehículo...');
+  const calculateStats = () => {
+    const totalProducts = products.length;
+    const totalValue = products.reduce((sum, p) => sum + (p.precio * (p.cantidad || 0)), 0);
+    const lowStock = products.filter(p => (p.cantidad || 0) < 5).length;
+    
+    setStats({ totalProducts, totalValue, lowStock });
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
     try {
-      console.log('📦 Datos recibidos del formulario:', data);
+      const url = editingProduct 
+        ? `/api/products/${editingProduct._id}`
+        : '/api/products';
+      
+      const method = editingProduct ? 'PUT' : 'POST';
+      
+      // CORRECCIÓN: Usar los nombres correctos del backend
+      const dataToSend = {
+        nombre: formData.nombre,
+        categoria: formData.categoria,
+        precio: parseFloat(formData.precio),
+        descripcion: formData.descripcion,
+        imageUrl: formData.imageUrl,
+        cilindrada: parseFloat(formData.cilindrada) || 0,
+        velocidadMax: parseFloat(formData.velocidadMax) || 0,
+        peso: parseFloat(formData.peso) || 0,
+        cantidad: parseInt(formData.cantidad) || 0,
+        disponible: Boolean(formData.disponible)
+      };
 
-      const productData = {
-        nombre: data.nombre || data.name || '',
-        categoria: data.categoria || data.category || 'moto',
-        precio: Number(data.precio || data.price || 0),
-        descripcion: data.descripcion || data.description || '',
-        imagen: data.imageUrl || data.imagen || '',
-        cilindrada: data.cilindrada || '',
-        velocidadMax: data.velocidadMax || '',
-        peso: data.peso || '',
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dataToSend)
+      });
+
+      if (response.ok) {
+        toast.success(editingProduct ? 'Producto actualizado' : 'Producto creado');
+        fetchProducts();
+        closeModal();
+      } else {
+        const error = await response.json();
+        toast.error(error.message || 'Error al guardar producto');
+      }
+    } catch (error) {
+      toast.error('Error al guardar producto');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (window.confirm('¿Seguro que deseas eliminar este producto?')) {
+      try {
+        const response = await fetch(`/api/products/${id}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          toast.success('Producto eliminado');
+          fetchProducts();
+        }
+      } catch (error) {
+        toast.error('Error al eliminar producto');
+      }
+    }
+  };
+
+  const openModal = (product = null) => {
+    if (product) {
+      setEditingProduct(product);
+      setFormData({
+        nombre: product.nombre || '',
+        descripcion: product.descripcion || '',
+        precio: product.precio?.toString() || '',
+        categoria: product.categoria || '',
+        imageUrl: product.imagen || '',
+        cilindrada: product.cilindrada?.toString() || '',
+        velocidadMax: product.velocidadMax?.toString() || '',
+        peso: product.peso?.toString() || '',
+        cantidad: product.cantidad || 0,
+        disponible: product.disponible !== undefined ? product.disponible : true
+      });
+    } else {
+      setEditingProduct(null);
+      setFormData({
+        nombre: '',
+        descripcion: '',
+        precio: '',
+        categoria: '',
+        imageUrl: '',
+        cilindrada: '',
+        velocidadMax: '',
+        peso: '',
+        cantidad: 0,
         disponible: true
-      };
-
-      console.log('📤 Enviando al backend:', productData);
-
-      const res = await fetch(API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        console.error('❌ Error del servidor:', errorData);
-        throw new Error(errorData.message || 'Error al guardar');
-      }
-
-      const newProduct = await res.json();
-      console.log('✅ Vehículo creado exitosamente:', newProduct);
-
-      await fetchVehicles();
-      setShowForm(false);
-
-      toast.success(`🎉 ${productData.nombre} agregado exitosamente`, {
-        id: loadingToast,
-        duration: 4000,
-      });
-    } catch (error) {
-      toast.error(`❌ Error: ${error.message}`, {
-        id: loadingToast,
-        duration: 4000,
       });
     }
+    setIsModalOpen(true);
   };
 
-  const handleEditVehicle = async (vehicleData) => {
-    const loadingToast = toast.loading('Actualizando vehículo...');
-
-    try {
-      console.log('✏️ Editando vehículo:', vehicleData);
-
-      const productData = {
-        nombre: vehicleData.nombre || vehicleData.name || editingVehicle.nombre,
-        precio: Number(vehicleData.precio || vehicleData.price || editingVehicle.precio),
-        categoria: vehicleData.categoria || vehicleData.category || editingVehicle.categoria,
-        descripcion: vehicleData.descripcion || vehicleData.description || editingVehicle.descripcion,
-        imagen: vehicleData.imageUrl || vehicleData.imagen || editingVehicle.imagen,
-        cilindrada: vehicleData.cilindrada || editingVehicle.cilindrada || '',
-        velocidadMax: vehicleData.velocidadMax || editingVehicle.velocidadMax || '',
-        peso: vehicleData.peso || editingVehicle.peso || '',
-        disponible: vehicleData.disponible !== undefined ? vehicleData.disponible : editingVehicle.disponible
-      };
-
-      console.log('📤 Actualizando en backend:', productData);
-
-      const res = await fetch(`${API_URL}/${editingVehicle._id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(productData),
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Error al actualizar vehículo');
-      }
-
-      const updatedProduct = await res.json();
-      console.log('✅ Vehículo actualizado:', updatedProduct);
-
-      await fetchVehicles();
-      setEditingVehicle(null);
-      setShowForm(false);
-
-      toast.success(`✅ ${productData.nombre} actualizado exitosamente`, {
-        id: loadingToast,
-        duration: 4000,
-      });
-    } catch (error) {
-      console.error('❌ Error updating vehicle:', error);
-      toast.error(`❌ Error al actualizar: ${error.message}`, {
-        id: loadingToast,
-        duration: 4000,
-      });
-    }
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setEditingProduct(null);
+    setFormData({
+      nombre: '',
+      descripcion: '',
+      precio: '',
+      categoria: '',
+      imageUrl: '',
+      cilindrada: '',
+      velocidadMax: '',
+      peso: '',
+      cantidad: 0,
+      disponible: true
+    });
   };
 
-  const handleDeleteVehicle = async (vehicleId) => {
-    const vehicle = vehicles.find(v => v._id === vehicleId);
-    if (!vehicle) return;
-    setVehicleToDelete(vehicle);
-  };
-
-  const confirmDelete = async () => {
-    if (!vehicleToDelete) return;
-
-    const loadingToast = toast.loading('Eliminando vehículo...');
-
-    try {
-      console.log('🗑️ Eliminando vehículo:', vehicleToDelete._id);
-
-      const res = await fetch(`${API_URL}/${vehicleToDelete._id}`, {
-        method: 'DELETE'
-      });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.message || 'Error al eliminar vehículo');
-      }
-
-      console.log('✅ Vehículo eliminado');
-
-      await fetchVehicles();
-
-      toast.success(`🗑️ ${vehicleToDelete.nombre} eliminado exitosamente`, {
-        id: loadingToast,
-        duration: 4000,
-      });
-
-      setVehicleToDelete(null);
-    } catch (error) {
-      console.error('❌ Error deleting vehicle:', error);
-      toast.error(`❌ Error al eliminar: ${error.message}`, {
-        id: loadingToast,
-        duration: 4000,
-      });
-    }
-  };
-
-  const cancelDelete = () => {
-    setVehicleToDelete(null);
-  };
-
-  const handleUploadPhoto = () => {
-    toast.info('Función de subir foto próximamente');
-    setShowProfileModal(true);
-  };
+  const filteredProducts = products.filter(product =>
+    product.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    product.categoria?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="pt-16 min-h-screen bg-gray-50">
-      {/* Toaster configurado para mostrar notificaciones */}
-      <Toaster
+    <div className="min-h-screen bg-gray-50 p-6">
+      {/* SOLO UN TOASTER */}
+      <Toaster 
         position="top-right"
-        reverseOrder={false}
         toastOptions={{
-          duration: 4000,
+          duration: 3000,
           style: {
-            background: '#363636',
+            background: '#1f2937',
             color: '#fff',
-            fontSize: '14px',
+            padding: '16px',
+            borderRadius: '8px',
           },
           success: {
-            duration: 4000,
             iconTheme: {
               primary: '#10b981',
               secondary: '#fff',
             },
           },
           error: {
-            duration: 5000,
             iconTheme: {
               primary: '#ef4444',
-              secondary: '#fff',
-            },
-          },
-          loading: {
-            iconTheme: {
-              primary: '#3b82f6',
               secondary: '#fff',
             },
           },
         }}
       />
 
-      {/* NOTIFICACIÓN DE BIENVENIDA */}
-      {showWelcome && currentUser && (
-        <WelcomeNotification
-          user={currentUser}
-          onClose={() => setShowWelcome(false)}
-          onUploadPhoto={handleUploadPhoto}
-        />
-      )}
+      {/* CSS para la barra de progreso */}
+      <style>{`
+        .toast-progress {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          height: 3px;
+          background-color: #10b981;
+          animation: toast-progress-bar 3s linear forwards;
+        }
+        @keyframes toast-progress-bar {
+          from {
+            width: 0%;
+          }
+          to {
+            width: 100%;
+          }
+        }
+      `}</style>
 
-      {/* Modal de confirmación de eliminación */}
-      {vehicleToDelete && (
-        <DeleteConfirmModal
-          vehicle={vehicleToDelete}
-          onConfirm={confirmDelete}
-          onCancel={cancelDelete}
-        />
-      )}
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Panel de Administración</h1>
+          <p className="text-gray-600">Gestiona tu inventario de productos</p>
+        </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Header - RESPONSIVE */}
-        <div className="mb-6 sm:mb-8">
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-              Panel de Administración
-            </h1>
-
-            {/* Desktop Buttons */}
-            <div className="hidden sm:flex space-x-4">
-              <button
-                onClick={() => navigate('/users')}
-                className="flex items-center space-x-2 bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-800 transition"
-              >
-                <Users className="h-5 w-5" />
-                <span>Administrar Usuarios</span>
-              </button>
-              <button
-                onClick={() => {
-                  console.log('🔘 Botón Agregar Vehículo clickeado');
-                  setEditingVehicle(null);
-                  setShowForm(true);
-                }}
-                className="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
-              >
-                <Plus className="h-5 w-5" />
-                <span>Agregar Vehículo</span>
-              </button>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Total Productos</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.totalProducts}</p>
+              </div>
+              <Package className="w-12 h-12 text-blue-500" />
             </div>
-
-            {/* Mobile Buttons */}
-            <div className="flex sm:hidden gap-2">
-              <button
-                onClick={() => navigate('/users')}
-                className="flex-1 flex items-center justify-center space-x-2 bg-gray-700 text-white px-3 py-2 rounded-lg hover:bg-gray-800 transition text-sm"
-              >
-                <Users className="h-4 w-4" />
-                <span>Usuarios</span>
-              </button>
-              <button
-                onClick={() => {
-                  console.log('🔘 Botón Agregar Vehículo clickeado');
-                  setEditingVehicle(null);
-                  setShowForm(true);
-                }}
-                className="flex-1 flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition text-sm"
-              >
-                <Plus className="h-4 w-4" />
-                <span>Agregar</span>
-              </button>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Valor Total</p>
+                <p className="text-2xl font-bold text-gray-900">${stats.totalValue.toLocaleString()}</p>
+              </div>
+              <DollarSign className="w-12 h-12 text-green-500" />
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-lg shadow p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-gray-600">Stock Bajo</p>
+                <p className="text-2xl font-bold text-gray-900">{stats.lowStock}</p>
+              </div>
+              <TrendingUp className="w-12 h-12 text-orange-500" />
             </div>
           </div>
         </div>
 
-        {/* Content */}
-        {loading ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500 text-sm sm:text-base">Cargando vehículos...</p>
-          </div>
-        ) : (
-          <>
-            {/* Desktop Table */}
-            <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
-              <div className="flex items-start">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-blue-800">
-                    💡 Gestión de Stock
-                  </h3>
-                  <div className="mt-2 text-sm text-blue-700">
-                    <p>
-                      Cuando un cliente presiona "Cotizar", es redirigido a WhatsApp para coordinar la venta.
-                      <strong> Recuerda actualizar manualmente el stock</strong> haciendo clic en el ícono de edición (✏️) después de cada venta coordinada.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="hidden md:block">
-              <VehicleTable
-                vehicles={vehicles}
-                onEdit={(vehicle) => {
-                  setEditingVehicle(vehicle);
-                  setShowForm(true);
-                }}
-                onDelete={handleDeleteVehicle}
+        {/* Actions */}
+        <div className="bg-white rounded-lg shadow p-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
+            <div className="relative flex-1 w-full">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Buscar productos..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
+            <button
+              onClick={() => openModal()}
+              className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+            >
+              <Plus className="w-5 h-5" />
+              Nuevo Producto
+            </button>
+          </div>
+        </div>
 
-            {/* Mobile Cards */}
-            <MobileVehicleCards
-              vehicles={vehicles}
-              onEdit={(vehicle) => {
-                setEditingVehicle(vehicle);
-                setShowForm(true);
-              }}
-              onDelete={handleDeleteVehicle}
-            />
-          </>
-        )}
-
-        {showForm && (
-          <VehicleForm
-            vehicle={editingVehicle}
-            onSubmit={editingVehicle ? handleEditVehicle : handleAddVehicle}
-            onCancel={() => {
-              setShowForm(false);
-              setEditingVehicle(null);
-            }}
-          />
-        )}
+        {/* Products Table */}
+        <div className="bg-white rounded-lg shadow overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Producto</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Precio</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Disponible</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredProducts.map((product) => (
+                  <tr key={product._id} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <img src={product.imagen} alt={product.nombre} className="w-10 h-10 rounded-lg object-cover" />
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{product.nombre}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
+                        {product.categoria}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      ${product.precio?.toLocaleString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        (product.cantidad || 0) < 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                      }`}>
+                        {product.cantidad || 0} unidades
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                        product.disponible ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {product.disponible ? 'Sí' : 'No'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                      <button
+                        onClick={() => openModal(product)}
+                        className="text-blue-600 hover:text-blue-900 mr-4"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(product._id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
+
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
+                </h2>
+                <button onClick={closeModal} className="text-gray-400 hover:text-gray-600">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Nombre del Producto
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.nombre}
+                    onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Descripción
+                  </label>
+                  <textarea
+                    value={formData.descripcion}
+                    onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
+                    rows="3"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Precio
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.precio}
+                      onChange={(e) => setFormData({...formData, precio: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Categoría
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.categoria}
+                      onChange={(e) => setFormData({...formData, categoria: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cilindrada (cc)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.cilindrada}
+                      onChange={(e) => setFormData({...formData, cilindrada: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Velocidad Máx (km/h)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.velocidadMax}
+                      onChange={(e) => setFormData({...formData, velocidadMax: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Peso (kg)
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.peso}
+                      onChange={(e) => setFormData({...formData, peso: e.target.value})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Cantidad en Stock
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={formData.cantidad}
+                      onChange={(e) => setFormData({...formData, cantidad: parseInt(e.target.value) || 0})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Disponible
+                    </label>
+                    <select
+                      value={formData.disponible}
+                      onChange={(e) => setFormData({...formData, disponible: e.target.value === 'true'})}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="true">Sí</option>
+                      <option value="false">No</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    URL de la Imagen
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.imageUrl}
+                    onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    required
+                  />
+                </div>
+
+                {formData.imageUrl && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Vista Previa
+                    </label>
+                    <img 
+                      src={formData.imageUrl} 
+                      alt="Preview" 
+                      className="w-32 h-32 object-cover rounded-lg"
+                    />
+                  </div>
+                )}
+
+                <div className="flex gap-4 pt-4">
+                  <button
+                    type="submit"
+                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {editingProduct ? 'Actualizar' : 'Crear'} Producto
+                  </button>
+                  <button
+                    type="button"
+                    onClick={closeModal}
+                    className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-lg hover:bg-gray-300 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
