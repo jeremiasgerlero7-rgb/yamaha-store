@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Phone, Mail, MapPin, MessageCircle, Check } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 const WHATSAPP_NUMBER = '5493541567273'; // Formato internacional
@@ -31,10 +32,40 @@ const Quote = () => {
       setProduct(data);
     } catch (error) {
       console.error('Error:', error);
-      alert('Error al cargar el producto');
+      toast.error('Error al cargar el producto', {
+        style: {
+          background: 'rgba(17, 24, 39, 0.95)',
+          color: '#fff',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        },
+      });
       navigate('/models');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const updateProductStock = async () => {
+    try {
+      const newQuantity = Math.max(0, (product.cantidad || 0) - 1);
+      
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...product,
+          cantidad: newQuantity
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Error al actualizar stock');
+      }
+    } catch (error) {
+      console.error('Error updating stock:', error);
     }
   };
 
@@ -42,9 +73,29 @@ const Quote = () => {
     e.preventDefault();
 
     if (!formData.nombre || !formData.telefono) {
-      alert('Por favor completa tu nombre y teléfono');
+      toast.error('Por favor completa tu nombre y teléfono', {
+        style: {
+          background: 'rgba(17, 24, 39, 0.95)',
+          color: '#fff',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        },
+      });
       return;
     }
+
+    const loadingToast = toast.loading('Procesando tu solicitud...', {
+      style: {
+        background: 'rgba(17, 24, 39, 0.95)',
+        color: '#fff',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(59, 130, 246, 0.3)',
+        borderRadius: '12px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+      },
+    });
 
     // Guardar lead en la base de datos
     try {
@@ -71,6 +122,9 @@ const Quote = () => {
       // No detenemos el flujo, el usuario puede continuar a WhatsApp
     }
 
+    // Actualizar el stock del producto
+    await updateProductStock();
+
     // Construir mensaje para WhatsApp (MANTIENE FUNCIONALIDAD ORIGINAL)
     let mensaje = `Hola! Me interesa cotizar:\n\n`;
     mensaje += `*${product.nombre}*\n`;
@@ -91,7 +145,18 @@ const Quote = () => {
     window.open(whatsappUrl, '_blank');
 
     // Mostrar confirmación
-    alert('¡Te estamos redirigiendo a WhatsApp! 📱');
+    toast.success('¡Te estamos redirigiendo a WhatsApp! 📱', {
+      id: loadingToast,
+      duration: 4000,
+      style: {
+        background: 'rgba(17, 24, 39, 0.95)',
+        color: '#fff',
+        backdropFilter: 'blur(10px)',
+        border: '1px solid rgba(16, 185, 129, 0.3)',
+        borderRadius: '12px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+      },
+    });
   };
 
   const handleWhatsAppDirect = () => {
@@ -112,6 +177,43 @@ const Quote = () => {
 
   return (
     <div className="pt-16 min-h-screen bg-gray-50">
+      <Toaster
+        position="top-center"
+        reverseOrder={false}
+        gutter={8}
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: 'rgba(17, 24, 39, 0.95)',
+            color: '#fff',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '12px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+            padding: '16px',
+            fontWeight: '500',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+          loading: {
+            iconTheme: {
+              primary: '#3b82f6',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Header - RESPONSIVE */}
         <button
