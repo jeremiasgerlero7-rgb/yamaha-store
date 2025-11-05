@@ -318,8 +318,19 @@ const Admin = () => {
 
       <div className="max-w-7xl mx-auto">
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Panel de Administración</h1>
-          <p className="text-sm sm:text-base text-gray-600">Gestiona tu inventario y posibles ventas</p>
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Panel de Administración</h1>
+              <p className="text-sm sm:text-base text-gray-600">Gestiona tu inventario y posibles ventas</p>
+            </div>
+            
+            <div className="border-2 border-cyan-400 rounded-2xl bg-gradient-to-br from-cyan-50 to-transparent p-4 max-w-md">
+              <p className="text-sm text-cyan-900">
+                <span className="text-lg mr-2">⚠️</span>
+                <span className="font-semibold text-cyan-700">Importante:</span> Actualiza el stock manualmente. Las ventas y cotizaciones se gestionan fuera del sistema.
+              </p>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8 border-b border-gray-200 overflow-x-auto">
