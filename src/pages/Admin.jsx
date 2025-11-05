@@ -45,9 +45,9 @@ const Admin = () => {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      
+
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      
+
       const data = await response.json();
       setProducts(data);
     } catch (error) {
@@ -62,9 +62,9 @@ const Admin = () => {
         method: 'GET',
         headers: { 'Content-Type': 'application/json' },
       });
-      
+
       if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-      
+
       const data = await response.json();
       setLeads(data);
     } catch (error) {
@@ -82,16 +82,16 @@ const Admin = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const loadingToast = toast.loading(editingProduct ? 'Actualizando producto...' : 'Creando producto...');
-    
+
     try {
-      const url = editingProduct 
+      const url = editingProduct
         ? `${API_URL}/api/products/${editingProduct._id}`
         : `${API_URL}/api/products`;
-      
+
       const method = editingProduct ? 'PUT' : 'POST';
-      
+
       const dataToSend = {
         nombre: formData.nombre,
         categoria: formData.categoria,
@@ -137,7 +137,7 @@ const Admin = () => {
   const handleDelete = async (id) => {
     if (window.confirm('¿Seguro que deseas eliminar este producto?')) {
       const loadingToast = toast.loading('Eliminando producto...');
-      
+
       try {
         const response = await fetch(`${API_URL}/api/products/${id}`, {
           method: 'DELETE',
@@ -166,7 +166,7 @@ const Admin = () => {
   const handleDeleteLead = async (id) => {
     if (window.confirm('¿Seguro que deseas eliminar este contacto?')) {
       const loadingToast = toast.loading('Eliminando contacto...');
-      
+
       try {
         const response = await fetch(`${API_URL}/api/leads/${id}`, {
           method: 'DELETE',
@@ -195,11 +195,11 @@ const Admin = () => {
   const handleStockChange = async (productId, change) => {
     const product = products.find(p => p._id === productId);
     if (!product) return;
-    
+
     const newQuantity = Math.max(0, (product.cantidad || 0) + change);
-    
+
     const loadingToast = toast.loading('Actualizando stock...');
-    
+
     try {
       const response = await fetch(`${API_URL}/api/products/${productId}`, {
         method: 'PUT',
@@ -323,7 +323,7 @@ const Admin = () => {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Panel de Administración</h1>
               <p className="text-sm sm:text-base text-gray-600">Gestiona tu inventario y posibles ventas</p>
             </div>
-            
+
             <div className="border-2 border-cyan-400 rounded-2xl bg-gradient-to-br from-cyan-50 to-transparent p-4 max-w-md">
               <p className="text-sm text-cyan-900">
                 <span className="text-lg mr-2">⚠️</span>
@@ -336,11 +336,10 @@ const Admin = () => {
         <div className="flex flex-wrap gap-2 sm:gap-4 mb-6 sm:mb-8 border-b border-gray-200 overflow-x-auto">
           <button
             onClick={() => setActiveTab('products')}
-            className={`pb-3 sm:pb-4 px-3 sm:px-4 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${
-              activeTab === 'products'
+            className={`pb-3 sm:pb-4 px-3 sm:px-4 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${activeTab === 'products'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <Package className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -350,11 +349,10 @@ const Admin = () => {
           </button>
           <button
             onClick={() => setActiveTab('leads')}
-            className={`pb-3 sm:pb-4 px-3 sm:px-4 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${
-              activeTab === 'leads'
+            className={`pb-3 sm:pb-4 px-3 sm:px-4 font-medium transition-colors relative whitespace-nowrap text-sm sm:text-base ${activeTab === 'leads'
                 ? 'text-blue-600 border-b-2 border-blue-600'
                 : 'text-gray-500 hover:text-gray-700'
-            }`}
+              }`}
           >
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -391,7 +389,7 @@ const Admin = () => {
                   <Package className="w-10 h-10 sm:w-12 sm:h-12 text-blue-500" />
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -401,7 +399,7 @@ const Admin = () => {
                   <DollarSign className="w-10 h-10 sm:w-12 sm:h-12 text-green-500" />
                 </div>
               </div>
-              
+
               <div className="bg-white rounded-lg shadow p-4 sm:p-6">
                 <div className="flex items-center justify-between">
                   <div>
@@ -477,9 +475,8 @@ const Admin = () => {
                             >
                               <ChevronDown className="w-4 h-4" />
                             </button>
-                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                              (product.cantidad || 0) < 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                            }`}>
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${(product.cantidad || 0) < 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                              }`}>
                               {product.cantidad || 0}
                             </span>
                             <button
@@ -491,9 +488,8 @@ const Admin = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                            product.disponible ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                          }`}>
+                          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${product.disponible ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
                             {product.disponible ? 'Sí' : 'No'}
                           </span>
                         </td>
@@ -532,7 +528,7 @@ const Admin = () => {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between mb-3 pb-3 border-b">
                     <span className="text-sm text-gray-600">Stock:</span>
                     <div className="flex items-center gap-2">
@@ -542,9 +538,8 @@ const Admin = () => {
                       >
                         <ChevronDown className="w-4 h-4" />
                       </button>
-                      <span className={`px-3 py-1 text-sm font-semibold rounded-full ${
-                        (product.cantidad || 0) < 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
-                      }`}>
+                      <span className={`px-3 py-1 text-sm font-semibold rounded-full ${(product.cantidad || 0) < 5 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'
+                        }`}>
                         {product.cantidad || 0}
                       </span>
                       <button
@@ -558,13 +553,12 @@ const Admin = () => {
 
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-sm text-gray-600">Disponible:</span>
-                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                      product.disponible ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${product.disponible ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                      }`}>
                       {product.disponible ? 'Sí' : 'No'}
                     </span>
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <button
                       onClick={() => openModal(product)}
@@ -602,60 +596,124 @@ const Admin = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              {filteredLeads.map((lead) => (
-                <div key={lead._id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 sm:p-6">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex items-center gap-2">
-                      <Bike className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-                      <span className="font-semibold text-gray-900 text-sm sm:text-base">{lead.vehiculo}</span>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteLead(lead._id)}
-                      className="text-red-500 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
-                    </button>
-                  </div>
-                  
-                  <div className="space-y-2 sm:space-y-3">
-                    <div className="flex items-center gap-3 text-xs sm:text-sm">
-                      <Users className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                      <span className="text-gray-700">{lead.nombre} {lead.apellido}</span>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 text-xs sm:text-sm">
-                      <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                      <a href={`mailto:${lead.email}`} className="text-blue-600 hover:underline truncate">
-                        {lead.email}
-                      </a>
-                    </div>
-                    
-                    <div className="flex items-center gap-3 text-xs sm:text-sm">
-                      <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
-                      <a href={`tel:${lead.telefono}`} className="text-blue-600 hover:underline">
-                        {lead.telefono}
-                      </a>
+              {activeTab === 'leads' && (
+                <>
+                  <div className="bg-white rounded-lg shadow p-4 sm:p-6 mb-4 sm:mb-6">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+                      <input
+                        type="text"
+                        placeholder="Buscar por nombre, email o vehículo..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-9 sm:pl-10 pr-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
                     </div>
                   </div>
-                  
-                  {lead.mensaje && (
-                    <div className="mt-4 pt-4 border-t border-gray-200">
-                      <p className="text-xs text-gray-500 mb-1">Mensaje:</p>
-                      <p className="text-xs sm:text-sm text-gray-700">{lead.mensaje}</p>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                    {filteredLeads.map((lead) => (
+                      <div key={lead._id} className="bg-white rounded-lg shadow-md hover:shadow-xl transition-shadow p-4 sm:p-6">
+                        {/* Header con imagen y nombre del vehículo */}
+                        <div className="flex items-start gap-4 mb-4 pb-4 border-b border-gray-200">
+                          {lead.vehiculoImagen && (
+                            <img
+                              src={lead.vehiculoImagen}
+                              alt={lead.vehiculo}
+                              className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg flex-shrink-0"
+                              onError={(e) => {
+                                e.target.src = 'https://res.cloudinary.com/dbqapcw0r/image/upload/w_800,h_600,c_fill,g_center,q_auto,f_auto/moto.jpg';
+                              }}
+                            />
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="flex-1 min-w-0">
+                                <h3 className="font-bold text-gray-900 text-sm sm:text-base mb-1 break-words">
+                                  {lead.vehiculo}
+                                </h3>
+                                {lead.vehiculoPrecio > 0 && (
+                                  <p className="text-lg sm:text-xl font-bold text-yamaha-blue">
+                                    ${lead.vehiculoPrecio.toLocaleString()}
+                                  </p>
+                                )}
+                                {lead.vehiculoCilindrada > 0 && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    {lead.vehiculoCilindrada} cc
+                                  </p>
+                                )}
+                              </div>
+                              <button
+                                onClick={() => handleDeleteLead(lead._id)}
+                                className="text-red-500 hover:text-red-700 flex-shrink-0"
+                              >
+                                <Trash2 className="w-4 h-4 sm:w-5 sm:h-5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Información del cliente */}
+                        <div className="space-y-2 sm:space-y-3">
+                          <div className="flex items-center gap-3 text-xs sm:text-sm">
+                            <Users className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                            <span className="text-gray-700 font-medium">{lead.nombre}</span>
+                          </div>
+
+                          {lead.email && (
+                            <div className="flex items-center gap-3 text-xs sm:text-sm">
+                              <Mail className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                              <a
+                                href={`mailto:${lead.email}`}
+                                className="text-blue-600 hover:underline truncate"
+                              >
+                                {lead.email}
+                              </a>
+                            </div>
+                          )}
+
+                          <div className="flex items-center gap-3 text-xs sm:text-sm">
+                            <Phone className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400 flex-shrink-0" />
+                            <a
+                              href={`tel:${lead.telefono}`}
+                              className="text-blue-600 hover:underline"
+                            >
+                              {lead.telefono}
+                            </a>
+                          </div>
+                        </div>
+
+                        {/* Mensaje */}
+                        {lead.mensaje && (
+                          <div className="mt-4 pt-4 border-t border-gray-200">
+                            <p className="text-xs text-gray-500 mb-1">Mensaje:</p>
+                            <p className="text-xs sm:text-sm text-gray-700 break-words">{lead.mensaje}</p>
+                          </div>
+                        )}
+
+                        {/* Fecha */}
+                        <div className="mt-4 text-xs text-gray-400">
+                          {new Date(lead.createdAt).toLocaleDateString('es-AR', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {filteredLeads.length === 0 && (
+                    <div className="bg-white rounded-lg shadow p-8 sm:p-12 text-center">
+                      <Users className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-base sm:text-lg font-medium text-gray-900 mb-2">No hay contactos aún</h3>
+                      <p className="text-sm sm:text-base text-gray-500">Los clientes que completen el formulario de cotización aparecerán aquí.</p>
                     </div>
                   )}
-                  
-                  <div className="mt-4 text-xs text-gray-400">
-                    {new Date(lead.createdAt).toLocaleDateString('es-AR', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit'
-                    })}
-                  </div>
-                </div>
-              ))}
+                </>
+              )}
             </div>
 
             {filteredLeads.length === 0 && (
@@ -687,7 +745,7 @@ const Admin = () => {
                 <input
                   type="text"
                   value={formData.nombre}
-                  onChange={(e) => setFormData({...formData, nombre: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
                   className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   required
                 />
@@ -697,7 +755,7 @@ const Admin = () => {
                 <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Descripción</label>
                 <textarea
                   value={formData.descripcion}
-                  onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
                   rows={3}
                   className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
@@ -710,7 +768,7 @@ const Admin = () => {
                     type="number"
                     step="0.01"
                     value={formData.precio}
-                    onChange={(e) => setFormData({...formData, precio: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, precio: e.target.value })}
                     className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
                   />
@@ -721,7 +779,7 @@ const Admin = () => {
                   <input
                     type="text"
                     value={formData.categoria}
-                    onChange={(e) => setFormData({...formData, categoria: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
                     className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                     required
                   />
@@ -734,7 +792,7 @@ const Admin = () => {
                   <input
                     type="number"
                     value={formData.cilindrada}
-                    onChange={(e) => setFormData({...formData, cilindrada: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, cilindrada: e.target.value })}
                     className="w-full px-2 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -744,7 +802,7 @@ const Admin = () => {
                   <input
                     type="number"
                     value={formData.velocidadMax}
-                    onChange={(e) => setFormData({...formData, velocidadMax: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, velocidadMax: e.target.value })}
                     className="w-full px-2 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -754,7 +812,7 @@ const Admin = () => {
                   <input
                     type="number"
                     value={formData.peso}
-                    onChange={(e) => setFormData({...formData, peso: e.target.value})}
+                    onChange={(e) => setFormData({ ...formData, peso: e.target.value })}
                     className="w-full px-2 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -767,7 +825,7 @@ const Admin = () => {
                     type="number"
                     min="0"
                     value={formData.cantidad}
-                    onChange={(e) => setFormData({...formData, cantidad: parseInt(e.target.value) || 0})}
+                    onChange={(e) => setFormData({ ...formData, cantidad: parseInt(e.target.value) || 0 })}
                     className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -776,7 +834,7 @@ const Admin = () => {
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Disponible</label>
                   <select
                     value={formData.disponible}
-                    onChange={(e) => setFormData({...formData, disponible: e.target.value === 'true'})}
+                    onChange={(e) => setFormData({ ...formData, disponible: e.target.value === 'true' })}
                     className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="true">Sí</option>
@@ -790,7 +848,7 @@ const Admin = () => {
                 <input
                   type="url"
                   value={formData.imageUrl}
-                  onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
+                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
                   className="w-full px-3 sm:px-4 py-2 text-sm sm:text-base border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -798,9 +856,9 @@ const Admin = () => {
               {formData.imageUrl && (
                 <div>
                   <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1">Vista Previa</label>
-                  <img 
-                    src={formData.imageUrl} 
-                    alt="Preview" 
+                  <img
+                    src={formData.imageUrl}
+                    alt="Preview"
                     className="w-24 h-24 sm:w-32 sm:h-32 object-cover rounded-lg"
                   />
                 </div>

@@ -4,7 +4,7 @@ import { ArrowLeft, Phone, Mail, MapPin, MessageCircle, Check } from 'lucide-rea
 import toast, { Toaster } from 'react-hot-toast';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/products`;
-const WHATSAPP_NUMBER = '5493541567273'; // Formato internacional
+const WHATSAPP_NUMBER = '5493541567273';
 
 const Quote = () => {
   const { id } = useParams();
@@ -97,21 +97,25 @@ const Quote = () => {
       },
     });
 
-    // Guardar lead en la base de datos
+    // Guardar lead en la base de datos con TODOS los campos del modelo
     try {
+      const leadData = {
+        nombre: formData.nombre,
+        email: formData.email || '',
+        telefono: formData.telefono,
+        vehiculo: product.nombre,
+        vehiculoImagen: product.imagen || '',
+        vehiculoPrecio: product.precio || 0,
+        vehiculoCilindrada: product.cilindrada || 0,
+        mensaje: formData.mensaje || ''
+      };
+
       const response = await fetch('https://yamaha-store-backend.onrender.com/api/leads', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          nombre: formData.nombre,
-          apellido: '', // No tienes apellido en el formulario, envío vacío
-          email: formData.email || '',
-          telefono: formData.telefono,
-          vehiculo: product.nombre, // El nombre del producto
-          mensaje: formData.mensaje || ''
-        })
+        body: JSON.stringify(leadData)
       });
 
       if (!response.ok) {
@@ -125,7 +129,7 @@ const Quote = () => {
     // Actualizar el stock del producto
     await updateProductStock();
 
-    // Construir mensaje para WhatsApp (MANTIENE FUNCIONALIDAD ORIGINAL)
+    // Construir mensaje para WhatsApp
     let mensaje = `Hola! Me interesa cotizar:\n\n`;
     mensaje += `*${product.nombre}*\n`;
     mensaje += `Precio: $${product.precio.toLocaleString()}\n\n`;
@@ -135,7 +139,7 @@ const Quote = () => {
     if (formData.email) mensaje += `Email: ${formData.email}\n`;
     if (formData.parteDePago) mensaje += `\n✅ Tengo moto para dar en parte de pago\n`;
     if (formData.financiacion) mensaje += `✅ Me interesa financiación\n`;
-    if (formData.mensaje) mensaje += `\n Mensaje: ${formData.mensaje}\n`;
+    if (formData.mensaje) mensaje += `\nMensaje: ${formData.mensaje}\n`;
 
     // Codificar mensaje para URL
     const encodedMessage = encodeURIComponent(mensaje);
@@ -215,7 +219,6 @@ const Quote = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Header - RESPONSIVE */}
         <button
           onClick={() => navigate(-1)}
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 mb-4 sm:mb-6 transition"
@@ -224,11 +227,8 @@ const Quote = () => {
           <span className="text-sm sm:text-base">Volver</span>
         </button>
 
-        {/* Grid Principal - RESPONSIVE */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
-          {/* Columna Izquierda - Producto */}
           <div className="space-y-4 sm:space-y-6">
-            {/* Imagen del Producto */}
             <div className="bg-white rounded-lg shadow-lg overflow-hidden">
               <img
                 src={product.imagen}
@@ -237,7 +237,6 @@ const Quote = () => {
               />
             </div>
 
-            {/* Información del Producto */}
             <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
                 {product.nombre}
@@ -249,7 +248,6 @@ const Quote = () => {
                 </span>
               </div>
 
-              {/* Especificaciones */}
               <div className="space-y-3 mb-4 sm:mb-6">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                   Especificaciones
@@ -282,7 +280,6 @@ const Quote = () => {
                 </div>
               </div>
 
-              {/* Descripción */}
               <div className="border-t pt-4">
                 <p className="text-gray-600 text-sm sm:text-base">
                   {product.descripcion}
@@ -291,9 +288,7 @@ const Quote = () => {
             </div>
           </div>
 
-          {/* Columna Derecha - Formulario y Contacto */}
           <div className="space-y-4 sm:space-y-6">
-            {/* Formulario - RESPONSIVE */}
             <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-4 sm:mb-6">
                 Solicitar Cotización
@@ -354,7 +349,6 @@ const Quote = () => {
                   />
                 </div>
 
-                {/* Checkboxes */}
                 <div className="space-y-2">
                   <label className="flex items-start sm:items-center space-x-2 cursor-pointer">
                     <input
@@ -379,7 +373,6 @@ const Quote = () => {
                   </label>
                 </div>
 
-                {/* Botón Submit */}
                 <button
                   type="submit"
                   className="w-full flex items-center justify-center space-x-2 bg-green-500 text-white px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg hover:bg-green-600 transition font-semibold text-sm sm:text-base shadow-lg"
@@ -390,14 +383,12 @@ const Quote = () => {
               </form>
             </div>
 
-            {/* Info de Contacto - RESPONSIVE */}
             <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
               <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-4">
                 Información de Contacto
               </h3>
 
               <div className="space-y-3 sm:space-y-4">
-                {/* WhatsApp Directo */}
                 <button
                   onClick={handleWhatsAppDirect}
                   className="w-full flex items-center space-x-3 p-3 sm:p-4 bg-green-50 rounded-lg hover:bg-green-100 transition"
@@ -409,7 +400,6 @@ const Quote = () => {
                   </div>
                 </button>
 
-                {/* Teléfono */}
                 <div className="flex items-center space-x-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                   <Phone className="h-5 w-5 sm:h-6 sm:w-6 text-yamaha-blue flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -418,7 +408,6 @@ const Quote = () => {
                   </div>
                 </div>
 
-                {/* Email */}
                 <div className="flex items-center space-x-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                   <Mail className="h-5 w-5 sm:h-6 sm:w-6 text-yamaha-blue flex-shrink-0" />
                   <div className="flex-1 min-w-0">
@@ -429,7 +418,6 @@ const Quote = () => {
                   </div>
                 </div>
 
-                {/* Dirección */}
                 <div className="flex items-start space-x-3 p-3 sm:p-4 bg-gray-50 rounded-lg">
                   <MapPin className="h-5 w-5 sm:h-6 sm:w-6 text-yamaha-blue flex-shrink-0 mt-0.5" />
                   <div className="flex-1 min-w-0">
