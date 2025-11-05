@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import VehicleTable from '../components/Admin/VehicleTable';
 import VehicleForm from '../components/Admin/VehicleForm';
-import { Plus, Users, X, Camera, Upload, Menu } from 'lucide-react';
+import { Plus, Users, X, Camera, Upload, Edit2, Trash2, MoreVertical } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useAuth } from '../context/AuthContext';
+import OptimizedImage from '../components/OptimizedImage';
 
 const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
@@ -30,13 +31,10 @@ const DeleteConfirmModal = ({ vehicle, onConfirm, onCancel }) => {
           
           <div className="border rounded-lg p-3 sm:p-4 bg-gray-50">
             <div className="flex items-center space-x-3 sm:space-x-4">
-              <img
+              <OptimizedImage
                 src={vehicle.imagen}
                 alt={vehicle.nombre}
-                className="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg flex-shrink-0"
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/80?text=Sin+Imagen';
-                }}
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg flex-shrink-0"
               />
               <div className="flex-1 min-w-0">
                 <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
@@ -138,6 +136,89 @@ const WelcomeNotification = ({ user, onClose, onUploadPhoto }) => {
   );
 };
 
+// ⭐ NUEVO: Vista Mobile de Cards con Acciones
+const MobileVehicleCards = ({ vehicles, onEdit, onDelete }) => {
+  const [openMenuId, setOpenMenuId] = useState(null);
+
+  return (
+    <div className="md:hidden space-y-4">
+      {vehicles.map((vehicle) => (
+        <div 
+          key={vehicle._id} 
+          className="bg-white rounded-lg shadow-md overflow-hidden"
+        >
+          {/* Imagen del Vehículo */}
+          <div className="relative h-48 bg-gray-200">
+            <OptimizedImage
+              src={vehicle.imagen}
+              alt={vehicle.nombre}
+              className="w-full h-48"
+            />
+            <span className={`absolute top-3 right-3 px-3 py-1 text-xs font-semibold rounded-full ${
+              vehicle.disponible 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {vehicle.disponible ? 'Disponible' : 'No disponible'}
+            </span>
+          </div>
+
+          {/* Información y Acciones */}
+          <div className="p-4">
+            <div className="flex items-start justify-between mb-3">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-lg font-bold text-gray-900 truncate mb-1">
+                  {vehicle.nombre}
+                </h3>
+                <p className="text-sm text-gray-500 capitalize mb-2">
+                  {vehicle.categoria}
+                </p>
+                <p className="text-xl font-bold text-blue-600">
+                  ${vehicle.precio?.toLocaleString('es-AR')}
+                </p>
+              </div>
+            </div>
+
+            {/* Especificaciones en Grid */}
+            <div className="grid grid-cols-3 gap-2 mb-4 py-3 border-t border-b">
+              <div className="text-center">
+                <p className="text-xs text-gray-500">Cilindrada</p>
+                <p className="text-sm font-semibold text-gray-900">{vehicle.cilindrada}</p>
+              </div>
+              <div className="text-center border-l border-r">
+                <p className="text-xs text-gray-500">Vel. Máx</p>
+                <p className="text-sm font-semibold text-gray-900">{vehicle.velocidadMax}</p>
+              </div>
+              <div className="text-center">
+                <p className="text-xs text-gray-500">Peso</p>
+                <p className="text-sm font-semibold text-gray-900">{vehicle.peso}</p>
+              </div>
+            </div>
+
+            {/* Botones de Acción */}
+            <div className="flex gap-2">
+              <button
+                onClick={() => onEdit(vehicle)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-medium"
+              >
+                <Edit2 className="h-4 w-4" />
+                <span>Editar</span>
+              </button>
+              <button
+                onClick={() => onDelete(vehicle._id)}
+                className="flex-1 flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span>Eliminar</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
 const Admin = () => {
   const navigate = useNavigate();
   const { currentUser } = useAuth();
@@ -148,7 +229,6 @@ const Admin = () => {
   const [vehicleToDelete, setVehicleToDelete] = useState(null);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
-  const [showMobileMenu, setShowMobileMenu] = useState(false);
 
   useEffect(() => {
     fetchVehicles();
@@ -443,14 +523,29 @@ const Admin = () => {
             <p className="text-gray-500 text-sm sm:text-base">Cargando vehículos...</p>
           </div>
         ) : (
-          <VehicleTable
-            vehicles={vehicles}
-            onEdit={(vehicle) => {
-              setEditingVehicle(vehicle);
-              setShowForm(true);
-            }}
-            onDelete={handleDeleteVehicle}
-          />
+          <>
+            {/* Desktop Table */}
+            <div className="hidden md:block">
+              <VehicleTable
+                vehicles={vehicles}
+                onEdit={(vehicle) => {
+                  setEditingVehicle(vehicle);
+                  setShowForm(true);
+                }}
+                onDelete={handleDeleteVehicle}
+              />
+            </div>
+
+            {/* Mobile Cards */}
+            <MobileVehicleCards
+              vehicles={vehicles}
+              onEdit={(vehicle) => {
+                setEditingVehicle(vehicle);
+                setShowForm(true);
+              }}
+              onDelete={handleDeleteVehicle}
+            />
+          </>
         )}
 
         {showForm && (
