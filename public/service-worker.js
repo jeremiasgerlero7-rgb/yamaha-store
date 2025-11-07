@@ -1,10 +1,10 @@
-// public/service-worker.js - OPTIMIZADO
+// public/service-worker.js - CORREGIDO
 const CACHE_NAME = 'yamaha-v2.0';
 const urlsToCache = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/offline.html' // Crear esta página
+  '/offline.html'
 ];
 
 // Instalar SW y cachear recursos esenciales
@@ -15,7 +15,7 @@ self.addEventListener('install', (event) => {
         console.log('Cache abierto');
         return cache.addAll(urlsToCache);
       })
-      .then(() => self.skipWaiting()) // Activar inmediatamente
+      .then(() => self.skipWaiting())
   );
 });
 
@@ -40,7 +40,13 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Estrategia Network First para API
+  // ⚠️ CRÍTICO: Solo cachear peticiones GET
+  if (request.method !== 'GET') {
+    // Para PUT, POST, DELETE, etc. - ir directo a la red
+    return;
+  }
+
+  // Estrategia Network First para API (solo GET)
   if (url.pathname.includes('/api/') || url.pathname.includes('/products')) {
     event.respondWith(
       fetch(request)

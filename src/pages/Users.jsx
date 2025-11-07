@@ -248,10 +248,10 @@ const Users = () => {
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => window.history.back()}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition"
+                className="flex items-center space-x-2 text-gray-1000 hover:text-gray-900 transition"
               >
                 <ArrowLeft className="h-5 w-5" />
-                <span>Volver</span>
+                <span>Volver al Panel de Administración</span>
               </button>
               <h1 className="text-3xl font-bold text-gray-900">Administrar Usuarios</h1>
             </div>

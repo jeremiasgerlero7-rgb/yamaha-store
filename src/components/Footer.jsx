@@ -36,7 +36,7 @@ const Footer = ({ onOpenLegal, onOpenFAQ }) => {
   ];
 
   return (
-    <footer className="relative bg-gradient-to-br from-black via-yamaha-dark-900 to-yamaha-dark-800 text-white mt-16 overflow-hidden">
+    <footer className="relative bg-gradient-to-br from-black via-yamaha-dark-900 to-yamaha-dark-800 text-white overflow-hidden">
       {/* Animated Background Grid */}
       <div className="absolute inset-0 opacity-5">
         <div className="absolute inset-0" style={{
@@ -73,8 +73,8 @@ const Footer = ({ onOpenLegal, onOpenFAQ }) => {
         }}
       />
 
-      {/* Top border with gradient */}
-      <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-accent"></div>
+      {/* Top border - SOLO LÍNEA AMARILLA FINA */}
+      <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-accent"></div>
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         {/* Features Bar */}

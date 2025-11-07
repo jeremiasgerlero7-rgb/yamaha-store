@@ -21,6 +21,7 @@ import FAQPanel from './components/FAQPanel';
 import Profile from './pages/Profile';
 import { useNetwork } from './hooks/useNetwork';
 import { WifiOff, AlertTriangle } from 'lucide-react';
+import GestionVentas from './pages/GestionVentas';
 
 // Banner de estado de red
 const NetworkBanner = ({ online, isSlowConnection }) => {
@@ -82,6 +83,14 @@ function AppContent() {
             <Route path="/cotizar/:id" element={<Quote />} />
             <Route path="/quoteinfo" element={<QuoteInfo />} />
             <Route path="/profile" element={<Profile />} />
+             <Route 
+              path="/gestionventas" 
+              element={
+                <ProtectedRoute>
+                  <GestionVentas />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="/users" 
               element={

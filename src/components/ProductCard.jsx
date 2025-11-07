@@ -31,7 +31,7 @@ const ProductCard = ({ product }) => {
           }}
         />
         
-        {/* ✅ NUEVO: Badge de disponibilidad */}
+        {/* Badge de disponibilidad */}
         <div className="absolute top-3 right-3">
           {product.disponible && product.cantidad > 0 ? (
             <div className="bg-green-500 text-white px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 shadow-lg">
@@ -44,13 +44,22 @@ const ProductCard = ({ product }) => {
             </div>
           )}
         </div>
+
+        {/* Badge de categoría SIN icono */}
+        <div className="absolute top-3 left-3">
+          <div className="bg-yamaha-blue text-white px-3 py-1.5 rounded-full text-xs font-semibold shadow-lg capitalize">
+            {product.categoria}
+          </div>
+        </div>
       </div>
       
       {/* Contenido */}
       <div className="p-6 flex flex-col flex-grow">
+        {/* Título */}
         <h3 className="text-xl font-bold text-gray-900 mb-2">
           {product.nombre}
         </h3>
+
         <p className="text-black-600 font-bold text-sm mb-4">
           {product.cilindrada} (cc) {product.velocidadMax} KM/h {product.peso} Kg
         </p>

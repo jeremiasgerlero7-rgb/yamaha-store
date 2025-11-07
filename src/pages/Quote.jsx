@@ -48,32 +48,12 @@ const Quote = () => {
     }
   };
 
-  const updateProductStock = async () => {
-    try {
-      const newQuantity = Math.max(0, (product.cantidad || 0) - 1);
-      
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...product,
-          cantidad: newQuantity
-        })
-      });
-
-      if (!response.ok) {
-        throw new Error('Error al actualizar stock');
-      }
-    } catch (error) {
-      console.error('Error updating stock:', error);
-    }
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.nombre || !formData.telefono) {
-      toast.error('Por favor completa tu nombre y teléfono', {
+    // Validación de campos obligatorios
+    if (!formData.nombre || !formData.telefono || !formData.email) {
+      toast.error('Por favor completa todos los campos obligatorios: Nombre, Teléfono y Email', {
         style: {
           background: 'rgba(17, 24, 39, 0.95)',
           color: '#fff',
@@ -82,6 +62,24 @@ const Quote = () => {
           borderRadius: '12px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
         },
+        duration: 5000,
+      });
+      return;
+    }
+
+    // Validación de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      toast.error('Por favor ingresa un email válido', {
+        style: {
+          background: 'rgba(17, 24, 39, 0.95)',
+          color: '#fff',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        },
+        duration: 4000,
       });
       return;
     }
@@ -97,20 +95,37 @@ const Quote = () => {
       },
     });
 
-    // Guardar lead en la base de datos con TODOS los campos del modelo
     try {
+      // Preparar datos del lead
       const leadData = {
+        // Datos del cliente
         nombre: formData.nombre,
-        email: formData.email || '',
+        email: formData.email,
         telefono: formData.telefono,
+        mensaje: formData.mensaje || '',
+
+        // Opciones
+        parteDePago: formData.parteDePago || false,
+        financiacion: formData.financiacion || false,
+
+        // Datos del vehículo (copia del producto)
         vehiculo: product.nombre,
-        vehiculoImagen: product.imagen || '',
-        vehiculoPrecio: product.precio || 0,
-        vehiculoCilindrada: product.cilindrada || 0,
-        mensaje: formData.mensaje || ''
+        vehiculoImagen: product.imagen,
+        vehiculoPrecio: product.precio,
+        vehiculoCilindrada: product.cilindrada,
+        vehiculoCategoria: product.categoria,
+        vehiculoPeso: product.peso,
+        vehiculoVelocidadMax: product.velocidadMax,
+        vehiculoDescripcion: product.descripcion,
+
+        // Referencia al producto
+        productId: product._id
       };
 
-      const response = await fetch('https://yamaha-store-backend.onrender.com/api/leads', {
+      console.log('📤 Enviando lead:', leadData);
+
+      // Guardar lead en la base de datos
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/leads`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -118,49 +133,67 @@ const Quote = () => {
         body: JSON.stringify(leadData)
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        console.error('Error al guardar el lead');
+        console.error('❌ Error del servidor:', responseData);
+        throw new Error(responseData.message || 'Error al guardar la cotización');
       }
+
+      console.log('✅ Lead guardado exitosamente:', responseData);
+
+      // Construir mensaje para WhatsApp
+      let mensaje = `Hola! Me interesa cotizar:\n\n`;
+      mensaje += `*${product.nombre}*\n`;
+      mensaje += `Precio: $${product.precio.toLocaleString()}\n\n`;
+      mensaje += `*Mis datos:*\n`;
+      mensaje += `Nombre: ${formData.nombre}\n`;
+      mensaje += `Teléfono: ${formData.telefono}\n`;
+      mensaje += `Email: ${formData.email}\n`;
+      if (formData.parteDePago) mensaje += `\n✅ Tengo moto para dar en parte de pago\n`;
+      if (formData.financiacion) mensaje += `✅ Me interesa financiación\n`;
+      if (formData.mensaje) mensaje += `\nMensaje: ${formData.mensaje}\n`;
+
+      const encodedMessage = encodeURIComponent(mensaje);
+      const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
+
+      // Abrir WhatsApp
+      window.open(whatsappUrl, '_blank');
+
+      // Mostrar confirmación
+      toast.success('¡Cotización enviada! Redirigiendo al inicio... 📱', {
+        id: loadingToast,
+        duration: 2000,
+        style: {
+          background: 'rgba(17, 24, 39, 0.95)',
+          color: '#fff',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(16, 185, 129, 0.3)',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        },
+      });
+
+      // Redirigir al home después de 2 segundos
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+
     } catch (error) {
-      console.error('Error al guardar lead:', error);
-      // No detenemos el flujo, el usuario puede continuar a WhatsApp
+      console.error('❌ Error completo:', error);
+      toast.error(error.message || 'Error al procesar la solicitud', {
+        id: loadingToast,
+        style: {
+          background: 'rgba(17, 24, 39, 0.95)',
+          color: '#fff',
+          backdropFilter: 'blur(10px)',
+          border: '1px solid rgba(239, 68, 68, 0.3)',
+          borderRadius: '12px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+        },
+        duration: 4000,
+      });
     }
-
-    // Actualizar el stock del producto
-    await updateProductStock();
-
-    // Construir mensaje para WhatsApp
-    let mensaje = `Hola! Me interesa cotizar:\n\n`;
-    mensaje += `*${product.nombre}*\n`;
-    mensaje += `Precio: $${product.precio.toLocaleString()}\n\n`;
-    mensaje += `*Mis datos:*\n`;
-    mensaje += `Nombre: ${formData.nombre}\n`;
-    mensaje += `Teléfono: ${formData.telefono}\n`;
-    if (formData.email) mensaje += `Email: ${formData.email}\n`;
-    if (formData.parteDePago) mensaje += `\n✅ Tengo moto para dar en parte de pago\n`;
-    if (formData.financiacion) mensaje += `✅ Me interesa financiación\n`;
-    if (formData.mensaje) mensaje += `\nMensaje: ${formData.mensaje}\n`;
-
-    // Codificar mensaje para URL
-    const encodedMessage = encodeURIComponent(mensaje);
-    const whatsappUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodedMessage}`;
-
-    // Abrir WhatsApp
-    window.open(whatsappUrl, '_blank');
-
-    // Mostrar confirmación
-    toast.success('¡Te estamos redirigiendo a WhatsApp! 📱', {
-      id: loadingToast,
-      duration: 4000,
-      style: {
-        background: 'rgba(17, 24, 39, 0.95)',
-        color: '#fff',
-        backdropFilter: 'blur(10px)',
-        border: '1px solid rgba(16, 185, 129, 0.3)',
-        borderRadius: '12px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-      },
-    });
   };
 
   const handleWhatsAppDirect = () => {
@@ -241,7 +274,7 @@ const Quote = () => {
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4">
                 {product.nombre}
               </h1>
-              
+
               <div className="flex items-center justify-between mb-4 sm:mb-6">
                 <span className="text-3xl sm:text-4xl font-bold text-yamaha-blue">
                   ${product.precio.toLocaleString()}
@@ -297,7 +330,7 @@ const Quote = () => {
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Nombre completo *
+                    Nombre completo <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="text"
@@ -311,7 +344,7 @@ const Quote = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Teléfono *
+                    Teléfono <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="tel"
@@ -325,7 +358,7 @@ const Quote = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Email (opcional)
+                    Email <span className="text-red-500">*</span>
                   </label>
                   <input
                     type="email"
@@ -333,12 +366,13 @@ const Quote = () => {
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     className="w-full px-3 sm:px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yamaha-blue focus:border-transparent text-sm sm:text-base"
                     placeholder="tu@email.com"
+                    required
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Mensaje (opcional)
+                    Mensaje (Opcional)
                   </label>
                   <textarea
                     value={formData.mensaje}

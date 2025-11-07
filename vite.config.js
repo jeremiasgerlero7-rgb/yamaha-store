@@ -1,4 +1,3 @@
-// vite.config.js - OPTIMIZADO PARA PERFORMANCE
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -8,34 +7,45 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'mask-icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png'],
       manifest: {
-        name: 'Yamaha Motors',
+        name: 'Yamaha Motors Store',
         short_name: 'Yamaha',
         description: 'Motos y Cuatriciclos Yamaha',
         theme_color: '#0066cc',
         background_color: '#ffffff',
         display: 'standalone',
-        orientation: 'portrait',
+        orientation: 'portrait-primary',
         scope: '/',
         start_url: '/',
         icons: [
           {
-            src: 'icon-192.png',
+            src: '/icon-192.png',
             sizes: '192x192',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
           },
           {
-            src: 'icon-512.png',
+            src: '/icon-192.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'maskable'
+          },
+          {
+            src: '/icon-512.png',
             sizes: '512x512',
             type: 'image/png',
-            purpose: 'any maskable'
+            purpose: 'any'
+          },
+          {
+            src: '/icon-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable'
           }
         ]
       },
       workbox: {
-        // Estrategias de caché optimizadas
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/res\.cloudinary\.com\/.*/i,
@@ -44,7 +54,7 @@ export default defineConfig({
               cacheName: 'cloudinary-images',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 60 * 24 * 30 // 30 días
+                maxAgeSeconds: 60 * 60 * 24 * 30
               },
               cacheableResponse: {
                 statuses: [0, 200]
@@ -58,7 +68,7 @@ export default defineConfig({
               cacheName: 'google-fonts',
               expiration: {
                 maxEntries: 20,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 año
+                maxAgeSeconds: 60 * 60 * 24 * 365
               }
             }
           },
@@ -69,32 +79,31 @@ export default defineConfig({
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 5 // 5 minutos
+                maxAgeSeconds: 60 * 5
               },
               networkTimeoutSeconds: 10
             }
           }
         ],
-        // Ignorar URLs innecesarias
         navigateFallbackDenylist: [/^\/api/],
-        // Limpiar caches antiguos
         cleanupOutdatedCaches: true,
-        // Precachear menos archivos
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}']
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
       }
     })
   ],
   build: {
-    // Optimizaciones de build
     target: 'es2015',
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Eliminar console.log en producción
+        drop_console: true,
         drop_debugger: true
       }
     },
-    // Code splitting
     rollupOptions: {
       output: {
         manualChunks: {
@@ -103,14 +112,11 @@ export default defineConfig({
         }
       }
     },
-    // Optimizar chunks
     chunkSizeWarningLimit: 1000,
-    // Sourcemaps solo en dev
     sourcemap: false
   },
   server: {
     port: 5173,
-    // Comprimir respuestas
     compress: true
   }
 });
