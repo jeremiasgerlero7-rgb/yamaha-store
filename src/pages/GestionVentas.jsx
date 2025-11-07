@@ -312,53 +312,53 @@ const GestionVentas = () => {
         </button>
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-2 flex items-center gap-3">
-            <TrendingUp className="h-10 w-10 text-cyan-400" />
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold text-white mb-2 flex items-center gap-2 md:gap-3">
+            <TrendingUp className="h-7 w-7 md:h-10 md:w-10 text-cyan-400" />
             Gestión de Ventas
           </h1>
-          <p className="text-gray-400 text-lg">Administra tus cotizaciones y ventas</p>
+          <p className="text-gray-400 text-sm md:text-lg">Administra tus cotizaciones y ventas</p>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-xl p-6 border border-blue-500/30 hover:border-blue-400 transition-all hover:scale-105">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6 md:mb-8">
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg md:rounded-xl shadow-xl p-3 md:p-6 border border-blue-500/30 hover:border-blue-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 mb-1">Total</p>
-                <p className="text-3xl font-bold text-white">{stats.total}</p>
+                <p className="text-xs md:text-sm text-gray-400 mb-1">Total</p>
+                <p className="text-xl md:text-3xl font-bold text-white">{stats.total}</p>
               </div>
-              <Package className="h-12 w-12 text-blue-400 opacity-40" />
+              <Package className="h-8 w-8 md:h-12 md:w-12 text-blue-400 opacity-40" />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-xl p-6 border border-yellow-500/30 hover:border-yellow-400 transition-all hover:scale-105">
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg md:rounded-xl shadow-xl p-3 md:p-6 border border-yellow-500/30 hover:border-yellow-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 mb-1">Pendientes</p>
-                <p className="text-3xl font-bold text-white">{stats.pendientes}</p>
+                <p className="text-xs md:text-sm text-gray-400 mb-1">Pendientes</p>
+                <p className="text-xl md:text-3xl font-bold text-white">{stats.pendientes}</p>
               </div>
-              <Clock className="h-12 w-12 text-yellow-400 opacity-40" />
+              <Clock className="h-8 w-8 md:h-12 md:w-12 text-yellow-400 opacity-40" />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-xl p-6 border border-emerald-500/30 hover:border-emerald-400 transition-all hover:scale-105">
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg md:rounded-xl shadow-xl p-3 md:p-6 border border-emerald-500/30 hover:border-emerald-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 mb-1">Confirmadas</p>
-                <p className="text-3xl font-bold text-white">{stats.confirmados}</p>
+                <p className="text-xs md:text-sm text-gray-400 mb-1">Confirmadas</p>
+                <p className="text-xl md:text-3xl font-bold text-white">{stats.confirmados}</p>
               </div>
-              <CheckCircle className="h-12 w-12 text-emerald-400 opacity-40" />
+              <CheckCircle className="h-8 w-8 md:h-12 md:w-12 text-emerald-400 opacity-40" />
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl shadow-xl p-6 border border-red-500/30 hover:border-red-400 transition-all hover:scale-105">
+          <div className="bg-slate-800/50 backdrop-blur-sm rounded-lg md:rounded-xl shadow-xl p-3 md:p-6 border border-red-500/30 hover:border-red-400 transition-all">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-gray-400 mb-1">Canceladas</p>
-                <p className="text-3xl font-bold text-white">{stats.cancelados}</p>
+                <p className="text-xs md:text-sm text-gray-400 mb-1">Canceladas</p>
+                <p className="text-xl md:text-3xl font-bold text-white">{stats.cancelados}</p>
               </div>
-              <XCircle className="h-12 w-12 text-red-400 opacity-40" />
+              <XCircle className="h-8 w-8 md:h-12 md:w-12 text-red-400 opacity-40" />
             </div>
           </div>
         </div>
@@ -390,59 +390,63 @@ const GestionVentas = () => {
           )}
         </div>
 
-        {/* Filtros - CENTRADOS */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl shadow-xl p-2 inline-flex gap-2">
-            <button
-              onClick={() => setFiltroActivo('pendiente')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                filtroActivo === 'pendiente'
-                  ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-lg shadow-yellow-500/50 scale-105'
-                  : 'text-gray-400 hover:bg-slate-700 hover:text-white'
-              }`}
-            >
-              <Clock className="h-5 w-5" />
-              Pendientes
-              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                filtroActivo === 'pendiente' ? 'bg-white text-yellow-600' : 'bg-slate-700 text-yellow-400'
-              }`}>
-                {stats.pendientes}
-              </span>
-            </button>
+        {/* Filtros - RESPONSIVE con scroll horizontal en mobile */}
+        <div className="mb-6 md:mb-8">
+          <div className="overflow-x-auto pb-2 -mx-4 px-4 md:mx-0 md:px-0">
+            <div className="flex md:justify-center gap-2 min-w-max md:min-w-0">
+              <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl shadow-xl p-2 inline-flex gap-2">
+                <button
+                  onClick={() => setFiltroActivo('pendiente')}
+                  className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
+                    filtroActivo === 'pendiente'
+                      ? 'bg-gradient-to-r from-yellow-500 to-amber-500 text-white shadow-lg shadow-yellow-500/50 scale-105'
+                      : 'text-gray-400 hover:bg-slate-700 hover:text-white'
+                  }`}
+                >
+                  <Clock className="h-4 w-4 md:h-5 md:w-5" />
+                  <span className="text-sm md:text-base">Pendientes</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                    filtroActivo === 'pendiente' ? 'bg-white text-yellow-600' : 'bg-slate-700 text-yellow-400'
+                  }`}>
+                    {stats.pendientes}
+                  </span>
+                </button>
 
-            <button
-              onClick={() => setFiltroActivo('confirmado')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                filtroActivo === 'confirmado'
-                  ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-500/50 scale-105'
-                  : 'text-gray-400 hover:bg-slate-700 hover:text-white'
-              }`}
-            >
-              <CheckCircle className="h-5 w-5" />
-              Confirmadas
-              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                filtroActivo === 'confirmado' ? 'bg-white text-emerald-600' : 'bg-slate-700 text-emerald-400'
-              }`}>
-                {stats.confirmados}
-              </span>
-            </button>
+                <button
+                  onClick={() => setFiltroActivo('confirmado')}
+                  className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
+                    filtroActivo === 'confirmado'
+                      ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white shadow-lg shadow-emerald-500/50 scale-105'
+                      : 'text-gray-400 hover:bg-slate-700 hover:text-white'
+                  }`}
+                >
+                  <CheckCircle className="h-4 w-4 md:h-5 md:w-5" />
+                  <span className="text-sm md:text-base">Confirmadas</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                    filtroActivo === 'confirmado' ? 'bg-white text-emerald-600' : 'bg-slate-700 text-emerald-400'
+                  }`}>
+                    {stats.confirmados}
+                  </span>
+                </button>
 
-            <button
-              onClick={() => setFiltroActivo('cancelado')}
-              className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-                filtroActivo === 'cancelado'
-                  ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/50 scale-105'
-                  : 'text-gray-400 hover:bg-slate-700 hover:text-white'
-              }`}
-            >
-              <XCircle className="h-5 w-5" />
-              Canceladas
-              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                filtroActivo === 'cancelado' ? 'bg-white text-red-600' : 'bg-slate-700 text-red-400'
-              }`}>
-                {stats.cancelados}
-              </span>
-            </button>
+                <button
+                  onClick={() => setFiltroActivo('cancelado')}
+                  className={`flex items-center gap-2 px-4 md:px-6 py-2 md:py-3 rounded-lg font-semibold transition-all whitespace-nowrap ${
+                    filtroActivo === 'cancelado'
+                      ? 'bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg shadow-red-500/50 scale-105'
+                      : 'text-gray-400 hover:bg-slate-700 hover:text-white'
+                  }`}
+                >
+                  <XCircle className="h-4 w-4 md:h-5 md:w-5" />
+                  <span className="text-sm md:text-base">Canceladas</span>
+                  <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                    filtroActivo === 'cancelado' ? 'bg-white text-red-600' : 'bg-slate-700 text-red-400'
+                  }`}>
+                    {stats.cancelados}
+                  </span>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -467,14 +471,14 @@ const GestionVentas = () => {
                 key={lead._id}
                 className="bg-slate-800/50 backdrop-blur-sm border border-slate-700 rounded-xl shadow-xl overflow-hidden hover:shadow-2xl hover:border-cyan-500/50 transition-all duration-300"
               >
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6 p-4 md:p-6">
                   {/* Columna Izquierda - Vehículo */}
                   <div className="lg:col-span-1">
-                    <div className="relative rounded-lg overflow-hidden mb-4 group border border-slate-700">
+                    <div className="relative rounded-lg overflow-hidden mb-3 md:mb-4 group border border-slate-700">
                       <img
                         src={lead.vehiculoImagen || 'https://via.placeholder.com/800x600/1E40AF/FFFFFF?text=Yamaha'}
                         alt={lead.vehiculo}
-                        className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-110"
+                        className="w-full h-48 md:h-64 object-cover transition-transform duration-300 group-hover:scale-110"
                         onError={(e) => {
                           e.target.src = 'https://via.placeholder.com/800x600/1E40AF/FFFFFF?text=Yamaha';
                         }}
@@ -484,29 +488,29 @@ const GestionVentas = () => {
 
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
-                        <Bike className="h-5 w-5 text-cyan-400" />
-                        <h3 className="text-xl font-bold text-white">{lead.vehiculo || 'Vehículo no especificado'}</h3>
+                        <Bike className="h-4 w-4 md:h-5 md:w-5 text-cyan-400 flex-shrink-0" />
+                        <h3 className="text-base md:text-xl font-bold text-white truncate">{lead.vehiculo || 'Vehículo no especificado'}</h3>
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <DollarSign className="h-5 w-5 text-emerald-400" />
-                        <span className="text-2xl font-bold text-emerald-400">
+                        <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-emerald-400 flex-shrink-0" />
+                        <span className="text-xl md:text-2xl font-bold text-emerald-400">
                           ${lead.vehiculoPrecio?.toLocaleString() || '0'}
                         </span>
                       </div>
 
                       <button
                         onClick={() => toggleExpand(lead._id)}
-                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-4 py-3 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition font-semibold shadow-lg"
+                        className="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-cyan-600 to-blue-600 text-white px-4 py-2 md:py-3 rounded-lg hover:from-cyan-500 hover:to-blue-500 transition font-semibold shadow-lg text-sm md:text-base"
                       >
                         {expandedCards[lead._id] ? (
                           <>
-                            <ChevronUp className="h-5 w-5" />
+                            <ChevronUp className="h-4 w-4 md:h-5 md:w-5" />
                             Ocultar Info
                           </>
                         ) : (
                           <>
-                            <ChevronDown className="h-5 w-5" />
+                            <ChevronDown className="h-4 w-4 md:h-5 md:w-5" />
                             Más Info
                           </>
                         )}
@@ -514,33 +518,33 @@ const GestionVentas = () => {
 
                       {/* Info expandida del vehículo */}
                       {expandedCards[lead._id] && (
-                        <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-4 space-y-3 animate-fadeIn">
-                          <h4 className="font-bold text-white mb-3 flex items-center gap-2">
-                            <Package className="h-5 w-5 text-cyan-400" />
+                        <div className="bg-slate-900/50 border border-slate-700 rounded-lg p-3 md:p-4 space-y-3 animate-fadeIn">
+                          <h4 className="font-bold text-white text-sm md:text-base mb-3 flex items-center gap-2">
+                            <Package className="h-4 w-4 md:h-5 md:w-5 text-cyan-400" />
                             Especificaciones
                           </h4>
-                          <div className="grid grid-cols-2 gap-3">
-                            <div className="bg-slate-800/50 border border-slate-700 p-3 rounded-lg">
+                          <div className="grid grid-cols-2 gap-2 md:gap-3">
+                            <div className="bg-slate-800/50 border border-slate-700 p-2 md:p-3 rounded-lg">
                               <p className="text-xs text-gray-400 mb-1">Cilindrada</p>
-                              <p className="font-bold text-white">{lead.vehiculoCilindrada || 0} cc</p>
+                              <p className="font-bold text-white text-sm md:text-base">{lead.vehiculoCilindrada || 0} cc</p>
                             </div>
-                            <div className="bg-slate-800/50 border border-slate-700 p-3 rounded-lg">
+                            <div className="bg-slate-800/50 border border-slate-700 p-2 md:p-3 rounded-lg">
                               <p className="text-xs text-gray-400 mb-1">Velocidad Máx.</p>
-                              <p className="font-bold text-white">{lead.vehiculoVelocidadMax || 0} km/h</p>
+                              <p className="font-bold text-white text-sm md:text-base">{lead.vehiculoVelocidadMax || 0} km/h</p>
                             </div>
-                            <div className="bg-slate-800/50 border border-slate-700 p-3 rounded-lg">
+                            <div className="bg-slate-800/50 border border-slate-700 p-2 md:p-3 rounded-lg">
                               <p className="text-xs text-gray-400 mb-1">Peso</p>
-                              <p className="font-bold text-white">{lead.vehiculoPeso || 0} kg</p>
+                              <p className="font-bold text-white text-sm md:text-base">{lead.vehiculoPeso || 0} kg</p>
                             </div>
-                            <div className="bg-slate-800/50 border border-slate-700 p-3 rounded-lg">
+                            <div className="bg-slate-800/50 border border-slate-700 p-2 md:p-3 rounded-lg">
                               <p className="text-xs text-gray-400 mb-1">Categoría</p>
-                              <p className="font-bold text-white capitalize">{lead.vehiculoCategoria || 'N/A'}</p>
+                              <p className="font-bold text-white text-sm md:text-base capitalize">{lead.vehiculoCategoria || 'N/A'}</p>
                             </div>
                           </div>
                           {lead.vehiculoDescripcion && (
-                            <div className="bg-slate-800/50 border border-slate-700 p-3 rounded-lg mt-3">
+                            <div className="bg-slate-800/50 border border-slate-700 p-2 md:p-3 rounded-lg mt-3">
                               <p className="text-xs text-gray-400 mb-1">Descripción</p>
-                              <p className="text-sm text-gray-300">{lead.vehiculoDescripcion}</p>
+                              <p className="text-xs md:text-sm text-gray-300">{lead.vehiculoDescripcion}</p>
                             </div>
                           )}
                         </div>
@@ -549,16 +553,16 @@ const GestionVentas = () => {
                   </div>
 
                   {/* Columna Derecha - Información del Cliente */}
-                  <div className="lg:col-span-2 space-y-6">
+                  <div className="lg:col-span-2 space-y-4 md:space-y-6">
                     {/* Header con fecha */}
-                    <div className="flex items-center justify-between pb-4 border-b border-slate-700">
+                    <div className="flex items-center justify-between pb-3 md:pb-4 border-b border-slate-700">
                       <div className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5 text-gray-400" />
-                        <span className="text-sm text-gray-400">
+                        <Calendar className="h-4 w-4 md:h-5 md:w-5 text-gray-400 flex-shrink-0" />
+                        <span className="text-xs md:text-sm text-gray-400">
                           {formatearFecha(lead.createdAt)}
                         </span>
                       </div>
-                      <div className={`px-4 py-2 rounded-full font-semibold text-sm ${
+                      <div className={`px-2 md:px-4 py-1 md:py-2 rounded-full font-semibold text-xs md:text-sm ${
                         lead.estado === 'pendiente' ? 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/50' :
                         lead.estado === 'confirmado' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/50' :
                         'bg-red-500/20 text-red-400 border border-red-500/50'
@@ -568,51 +572,51 @@ const GestionVentas = () => {
                     </div>
 
                     {/* Información del cliente */}
-                    <div className="space-y-4">
-                      <h4 className="font-bold text-white text-lg flex items-center gap-2">
-                        <User className="h-5 w-5 text-cyan-400" />
+                    <div className="space-y-3 md:space-y-4">
+                      <h4 className="font-bold text-white text-base md:text-lg flex items-center gap-2">
+                        <User className="h-4 w-4 md:h-5 md:w-5 text-cyan-400" />
                         Información del Cliente
                       </h4>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="bg-slate-900/50 border border-slate-700 p-4 rounded-lg">
+                      <div className="grid grid-cols-1 gap-3 md:gap-4">
+                        <div className="bg-slate-900/50 border border-slate-700 p-3 md:p-4 rounded-lg">
                           <p className="text-xs text-gray-400 mb-1">Nombre Completo</p>
-                          <p className="font-bold text-white">{lead.nombre}</p>
+                          <p className="font-bold text-white text-sm md:text-base">{lead.nombre}</p>
                         </div>
 
-                        <div className="bg-slate-900/50 border border-slate-700 p-4 rounded-lg">
+                        <div className="bg-slate-900/50 border border-slate-700 p-3 md:p-4 rounded-lg">
                           <div className="flex items-center gap-2 mb-1">
-                            <Phone className="h-4 w-4 text-cyan-400" />
+                            <Phone className="h-3 w-3 md:h-4 md:w-4 text-cyan-400" />
                             <p className="text-xs text-gray-400">Teléfono</p>
                           </div>
-                          <p className="font-bold text-white">{lead.telefono}</p>
+                          <p className="font-bold text-white text-sm md:text-base">{lead.telefono}</p>
                         </div>
 
                         {lead.email && (
-                          <div className="bg-slate-900/50 border border-slate-700 p-4 rounded-lg md:col-span-2">
+                          <div className="bg-slate-900/50 border border-slate-700 p-3 md:p-4 rounded-lg">
                             <div className="flex items-center gap-2 mb-1">
-                              <Mail className="h-4 w-4 text-cyan-400" />
+                              <Mail className="h-3 w-3 md:h-4 md:w-4 text-cyan-400" />
                               <p className="text-xs text-gray-400">Email</p>
                             </div>
-                            <p className="font-bold text-white">{lead.email}</p>
+                            <p className="font-bold text-white text-sm md:text-base break-all">{lead.email}</p>
                           </div>
                         )}
                       </div>
 
                       {/* Opciones adicionales */}
                       {(lead.parteDePago || lead.financiacion) && (
-                        <div className="bg-blue-500/10 border border-blue-500/30 p-4 rounded-lg">
-                          <p className="text-sm font-semibold text-white mb-2">Opciones seleccionadas:</p>
+                        <div className="bg-blue-500/10 border border-blue-500/30 p-3 md:p-4 rounded-lg">
+                          <p className="text-xs md:text-sm font-semibold text-white mb-2">Opciones seleccionadas:</p>
                           <div className="space-y-2">
                             {lead.parteDePago && (
-                              <div className="flex items-center gap-2 text-sm text-gray-300">
-                                <CheckCircle className="h-4 w-4 text-emerald-400" />
+                              <div className="flex items-center gap-2 text-xs md:text-sm text-gray-300">
+                                <CheckCircle className="h-3 w-3 md:h-4 md:w-4 text-emerald-400 flex-shrink-0" />
                                 <span>Tiene vehículo para entregar como parte de pago</span>
                               </div>
                             )}
                             {lead.financiacion && (
-                              <div className="flex items-center gap-2 text-sm text-gray-300">
-                                <CheckCircle className="h-4 w-4 text-emerald-400" />
+                              <div className="flex items-center gap-2 text-xs md:text-sm text-gray-300">
+                                <CheckCircle className="h-3 w-3 md:h-4 md:w-4 text-emerald-400 flex-shrink-0" />
                                 <span>Interesado en financiación</span>
                               </div>
                             )}
@@ -622,38 +626,39 @@ const GestionVentas = () => {
 
                       {/* Mensaje */}
                       {lead.mensaje && (
-                        <div className="bg-slate-900/50 border border-slate-700 p-4 rounded-lg">
+                        <div className="bg-slate-900/50 border border-slate-700 p-3 md:p-4 rounded-lg">
                           <p className="text-xs text-gray-400 mb-2">Mensaje del cliente:</p>
-                          <p className="text-gray-300 italic">"{lead.mensaje}"</p>
+                          <p className="text-gray-300 italic text-xs md:text-sm">"{lead.mensaje}"</p>
                         </div>
                       )}
                     </div>
 
-                    {/* Botones de acción */}
-                    <div className="flex flex-wrap gap-3 pt-4 border-t border-slate-700">
+                    {/* Botones de acción - RESPONSIVE y agrupados */}
+                    <div className="grid grid-cols-2 lg:flex lg:flex-wrap gap-2 md:gap-3 pt-3 md:pt-4 border-t border-slate-700">
                       <button
                         onClick={() => abrirWhatsApp(lead.telefono, lead.nombre)}
-                        className="flex items-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-6 py-3 rounded-lg hover:from-green-500 hover:to-emerald-500 transition font-semibold shadow-lg shadow-green-500/30"
+                        className="flex items-center justify-center gap-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:from-green-500 hover:to-emerald-500 transition font-semibold shadow-lg shadow-green-500/30 text-xs md:text-base"
                       >
-                        <MessageCircle className="h-5 w-5" />
-                        WhatsApp
+                        <MessageCircle className="h-4 w-4 md:h-5 md:w-5" />
+                        <span className="hidden sm:inline">WhatsApp</span>
+                        <span className="sm:hidden">WA</span>
                       </button>
 
                       {lead.estado === 'pendiente' && (
                         <>
                           <button
                             onClick={() => actualizarEstado(lead._id, 'confirmado', lead)}
-                            className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white px-6 py-3 rounded-lg hover:from-emerald-500 hover:to-green-500 transition font-semibold shadow-lg shadow-emerald-500/30"
+                            className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:from-emerald-500 hover:to-green-500 transition font-semibold shadow-lg shadow-emerald-500/30 text-xs md:text-base"
                           >
-                            <CheckCircle className="h-5 w-5" />
+                            <CheckCircle className="h-4 w-4 md:h-5 md:w-5" />
                             Confirmar
                           </button>
 
                           <button
                             onClick={() => actualizarEstado(lead._id, 'cancelado', lead)}
-                            className="flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 text-white px-6 py-3 rounded-lg hover:from-red-500 hover:to-rose-500 transition font-semibold shadow-lg shadow-red-500/30"
+                            className="flex items-center justify-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:from-red-500 hover:to-rose-500 transition font-semibold shadow-lg shadow-red-500/30 text-xs md:text-base"
                           >
-                            <XCircle className="h-5 w-5" />
+                            <XCircle className="h-4 w-4 md:h-5 md:w-5" />
                             Cancelar
                           </button>
                         </>
@@ -662,9 +667,9 @@ const GestionVentas = () => {
                       {lead.estado === 'confirmado' && (
                         <button
                           onClick={() => actualizarEstado(lead._id, 'pendiente', lead)}
-                          className="flex items-center gap-2 bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-6 py-3 rounded-lg hover:from-yellow-500 hover:to-amber-500 transition font-semibold shadow-lg shadow-yellow-500/30"
+                          className="flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:from-yellow-500 hover:to-amber-500 transition font-semibold shadow-lg shadow-yellow-500/30 text-xs md:text-base col-span-2 lg:col-span-1"
                         >
-                          <Clock className="h-5 w-5" />
+                          <Clock className="h-4 w-4 md:h-5 md:w-5" />
                           Marcar Pendiente
                         </button>
                       )}
@@ -672,18 +677,18 @@ const GestionVentas = () => {
                       {lead.estado === 'cancelado' && (
                         <button
                           onClick={() => actualizarEstado(lead._id, 'pendiente', lead)}
-                          className="flex items-center gap-2 bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-6 py-3 rounded-lg hover:from-yellow-500 hover:to-amber-500 transition font-semibold shadow-lg shadow-yellow-500/30"
+                          className="flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-600 to-amber-600 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:from-yellow-500 hover:to-amber-500 transition font-semibold shadow-lg shadow-yellow-500/30 text-xs md:text-base col-span-2 lg:col-span-1"
                         >
-                          <Clock className="h-5 w-5" />
+                          <Clock className="h-4 w-4 md:h-5 md:w-5" />
                           Reactivar
                         </button>
                       )}
 
                       <button
                         onClick={() => confirmarEliminacion(lead)}
-                        className="flex items-center gap-2 bg-slate-700 text-white px-6 py-3 rounded-lg hover:bg-slate-600 transition font-semibold shadow-lg ml-auto"
+                        className="flex items-center justify-center gap-2 bg-slate-700 text-white px-3 md:px-6 py-2 md:py-3 rounded-lg hover:bg-slate-600 transition font-semibold shadow-lg col-span-2 lg:col-span-1 lg:ml-auto text-xs md:text-base"
                       >
-                        <Trash2 className="h-5 w-5" />
+                        <Trash2 className="h-4 w-4 md:h-5 md:w-5" />
                         Eliminar
                       </button>
                     </div>
