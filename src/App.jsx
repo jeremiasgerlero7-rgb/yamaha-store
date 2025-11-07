@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/Admin/ProtectedRoute';
@@ -128,6 +128,48 @@ function AppContent() {
 
 function App() {
   console.log('Origen actual:', window.location.origin);
+
+  // 🔥 REGISTRAR SERVICE WORKER
+  useEffect(() => {
+    // Solo registrar en producción (no en desarrollo)
+    if ('serviceWorker' in navigator && import.meta.env.PROD) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker
+          .register('/service-worker.js')
+          .then((registration) => {
+            console.log('✅ Service Worker registrado exitosamente:', registration.scope);
+            
+            // Verificar actualizaciones del SW
+            registration.addEventListener('updatefound', () => {
+              const newWorker = registration.installing;
+              console.log('🔄 Nueva versión del Service Worker encontrada');
+              
+              newWorker.addEventListener('statechange', () => {
+                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                  console.log('✨ Actualización disponible. Recarga la página para ver los cambios.');
+                  // Opcional: Mostrar notificación al usuario
+                  if (confirm('Nueva versión disponible. ¿Recargar ahora?')) {
+                    window.location.reload();
+                  }
+                }
+              });
+            });
+          })
+          .catch((error) => {
+            console.error('❌ Error al registrar Service Worker:', error);
+          });
+      });
+
+      // Manejar cambios de controlador (nueva versión activa)
+      let refreshing = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+          refreshing = true;
+          window.location.reload();
+        }
+      });
+    }
+  }, []);
 
   return (
     <AuthProvider>
