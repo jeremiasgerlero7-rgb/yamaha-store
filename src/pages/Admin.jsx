@@ -1,10 +1,8 @@
+import { Search, Plus, Edit2, Trash2, Package, DollarSign, TrendingUp, X, ChevronUp, ChevronDown, Settings, ShoppingCart, Upload, Link as LinkIcon, CheckCircle, XCircle, Eye } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
-import { Search, Plus, Edit2, Trash2, Package, DollarSign, TrendingUp, X, ChevronUp, ChevronDown, Settings, ShoppingCart, Upload, Link as LinkIcon } from 'lucide-react';
-
 const API_URL = 'https://yamaha-store-backend.onrender.com';
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB en bytes
+const MAX_FILE_SIZE = 5 * 1024 * 1024;
 
-// Toast Component
 const Toast = ({ message, type, onClose, duration = 4000 }) => {
   const [progress, setProgress] = useState(100);
 
@@ -59,10 +57,14 @@ const Admin = () => {
   const [uploadMethod, setUploadMethod] = useState('url');
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [showAvailableProducts, setShowAvailableProducts] = useState(false);
+  const [showUnavailableProducts, setShowUnavailableProducts] = useState(false);
   const [stats, setStats] = useState({
     totalProducts: 0,
     totalValue: 0,
-    lowStock: 0
+    lowStock: 0,
+    available: 0,
+    unavailable: 0
   });
 
   const [formData, setFormData] = useState({
@@ -115,8 +117,10 @@ const Admin = () => {
   const calculateStats = () => {
     const totalProducts = products.length;
     const totalValue = products.reduce((sum, p) => sum + (p.precio * (p.cantidad || 0)), 0);
-    const lowStock = products.filter(p => (p.cantidad || 0) < 5).length;
-    setStats({ totalProducts, totalValue, lowStock });
+    const lowStock = products.filter(p => (p.cantidad || 0) < 5 && (p.cantidad || 0) > 0).length;
+    const available = products.filter(p => p.disponible && (p.cantidad || 0) > 0).length;
+    const unavailable = products.filter(p => !p.disponible || (p.cantidad || 0) === 0).length;
+    setStats({ totalProducts, totalValue, lowStock, available, unavailable });
   };
 
   const uploadImageToCloudinary = async (file) => {
@@ -186,9 +190,10 @@ const Admin = () => {
 
       const method = editingProduct ? 'PUT' : 'POST';
 
-      // Automáticamente establecer disponible en false si cantidad es 0
       const cantidad = parseInt(formData.cantidad) || 0;
-      const disponible = cantidad > 0 ? Boolean(formData.disponible) : false;
+      // Si la cantidad es 0, forzar disponible a false
+      // Si la cantidad es mayor a 0, usar el valor del formData
+      const disponible = cantidad === 0 ? false : Boolean(formData.disponible);
 
       const dataToSend = {
         nombre: formData.nombre,
@@ -252,8 +257,13 @@ const Admin = () => {
 
     const newQuantity = Math.max(0, (product.cantidad || 0) + change);
     
-    // Si la cantidad llega a 0, automáticamente establecer disponible en false
-    const disponible = newQuantity > 0 ? product.disponible : false;
+    // Si la cantidad cambia de 0 a mayor que 0, automáticamente poner disponible en true
+    let disponible = product.disponible;
+    if ((product.cantidad || 0) === 0 && newQuantity > 0) {
+      disponible = true;
+    } else if (newQuantity === 0) {
+      disponible = false;
+    }
 
     try {
       const response = await fetch(`${API_URL}/api/products/${productId}`, {
@@ -267,8 +277,10 @@ const Admin = () => {
       });
 
       if (response.ok) {
-        if (newQuantity === 0 && product.disponible) {
+        if (newQuantity === 0) {
           showToast('Stock agotado - Producto marcado como no disponible', 'info');
+        } else if ((product.cantidad || 0) === 0 && newQuantity > 0) {
+          showToast('Stock agregado - Producto marcado como disponible', 'success');
         } else {
           showToast('Stock actualizado', 'success');
         }
@@ -279,6 +291,37 @@ const Admin = () => {
     } catch (error) {
       console.error('Error updating stock:', error);
       showToast('Error al actualizar stock', 'error');
+    }
+  };
+
+  const toggleDisponibilidad = async (productId) => {
+    const product = products.find(p => p._id === productId);
+    if (!product) return;
+
+    const newDisponible = !product.disponible;
+
+    try {
+      const response = await fetch(`${API_URL}/api/products/${productId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...product,
+          disponible: newDisponible
+        })
+      });
+
+      if (response.ok) {
+        showToast(
+          newDisponible ? 'Producto marcado como disponible' : 'Producto marcado como no disponible',
+          'success'
+        );
+        fetchProducts();
+      } else {
+        throw new Error('Error al actualizar disponibilidad');
+      }
+    } catch (error) {
+      console.error('Error updating availability:', error);
+      showToast('Error al actualizar disponibilidad', 'error');
     }
   };
 
@@ -328,6 +371,9 @@ const Admin = () => {
     product.nombre?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.categoria?.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const availableProducts = products.filter(p => p.disponible && (p.cantidad || 0) > 0);
+  const unavailableProducts = products.filter(p => !p.disponible || (p.cantidad || 0) === 0);
 
   const navigateToUsers = () => {
     window.location.href = '/users';
@@ -413,43 +459,220 @@ const Admin = () => {
           </button>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border border-cyan-500/20 p-4 sm:p-6 hover:scale-105 hover:shadow-cyan-500/30 transition-all duration-300">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8">
+          <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border border-cyan-500/20 p-3 sm:p-4 md:p-6 hover:scale-105 hover:shadow-cyan-500/30 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-gray-400 mb-1">Total Productos</p>
-                <p className="text-xl sm:text-2xl font-bold text-white">{stats.totalProducts}</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">{stats.totalProducts}</p>
               </div>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/50">
-                <Package className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/50">
+                <Package className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border border-emerald-500/20 p-4 sm:p-6 hover:scale-105 hover:shadow-emerald-500/30 transition-all duration-300">
+          <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border border-emerald-500/20 p-3 sm:p-4 md:p-6 hover:scale-105 hover:shadow-emerald-500/30 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-gray-400 mb-1">Valor Total</p>
-                <p className="text-xl sm:text-2xl font-bold text-white">${stats.totalValue.toLocaleString()}</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">${stats.totalValue.toLocaleString()}</p>
               </div>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
-                <DollarSign className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
+                <DollarSign className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
               </div>
             </div>
           </div>
 
-          <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border border-yellow-500/20 p-4 sm:p-6 hover:scale-105 hover:shadow-yellow-500/30 transition-all duration-300">
+          <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border border-yellow-500/20 p-3 sm:p-4 md:p-6 hover:scale-105 hover:shadow-yellow-500/30 transition-all duration-300">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs sm:text-sm text-gray-400 mb-1">Stock Bajo</p>
-                <p className="text-xl sm:text-2xl font-bold text-white">{stats.lowStock}</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">{stats.lowStock}</p>
               </div>
-              <div className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/50">
-                <TrendingUp className="w-6 h-6 sm:w-7 sm:h-7 text-white" />
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center shadow-lg shadow-yellow-500/50">
+                <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
               </div>
             </div>
           </div>
+
+          {/* CARD INTERACTIVA - Productos Disponibles */}
+          <button
+            onClick={() => {
+              setShowAvailableProducts(!showAvailableProducts);
+              setShowUnavailableProducts(false);
+            }}
+            className={`bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border p-3 sm:p-4 md:p-6 transition-all duration-300 text-left ${
+              showAvailableProducts 
+                ? 'border-emerald-500 shadow-emerald-500/50 scale-105' 
+                : 'border-emerald-500/20 hover:scale-105 hover:shadow-emerald-500/30'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm text-gray-400 mb-1">Disponibles</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">{stats.available}</p>
+                <p className="text-xs text-emerald-400 mt-1 hidden sm:block">Con stock</p>
+              </div>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/50">
+                <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
+              </div>
+            </div>
+            {showAvailableProducts && (
+              <div className="mt-2 flex items-center gap-1 text-emerald-400 text-xs sm:text-sm font-medium">
+                <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Mostrando</span>
+              </div>
+            )}
+          </button>
+
+          {/* CARD INTERACTIVA - Productos No Disponibles */}
+          <button
+            onClick={() => {
+              setShowUnavailableProducts(!showUnavailableProducts);
+              setShowAvailableProducts(false);
+            }}
+            className={`bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border p-3 sm:p-4 md:p-6 transition-all duration-300 text-left ${
+              showUnavailableProducts 
+                ? 'border-red-500 shadow-red-500/50 scale-105' 
+                : 'border-red-500/20 hover:scale-105 hover:shadow-red-500/30'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs sm:text-sm text-gray-400 mb-1">Sin Stock</p>
+                <p className="text-lg sm:text-xl md:text-2xl font-bold text-white">{stats.unavailable}</p>
+                <p className="text-xs text-red-400 mt-1 hidden sm:block">No disponibles</p>
+              </div>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 bg-gradient-to-br from-red-500 to-rose-500 rounded-xl flex items-center justify-center shadow-lg shadow-red-500/50">
+                <XCircle className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-white" />
+              </div>
+            </div>
+            {showUnavailableProducts && (
+              <div className="mt-2 flex items-center gap-1 text-red-400 text-xs sm:text-sm font-medium">
+                <Eye className="w-3 h-3 sm:w-4 sm:h-4" />
+                <span>Mostrando</span>
+              </div>
+            )}
+          </button>
         </div>
+
+        {/* Sección Productos Disponibles */}
+        {showAvailableProducts && (
+          <div className="mb-6 animate-slideIn">
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border border-emerald-500/30 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-emerald-400" />
+                    Productos Disponibles
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-400 mt-1">Vehículos con stock disponible</p>
+                </div>
+                <button onClick={() => setShowAvailableProducts(false)} className="text-gray-400 hover:text-white transition">
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                {availableProducts.map((product) => (
+                  <div key={product._id} className="bg-slate-900/50 border border-emerald-500/20 rounded-lg p-3 hover:border-emerald-500/40 transition-all">
+                    <img 
+                      src={product.imagen || 'https://placehold.co/400x300?text=Sin+Imagen'} 
+                      alt={product.nombre} 
+                      className="w-full h-32 sm:h-40 object-cover rounded-lg mb-3"
+                      onError={(e) => e.target.src = 'https://placehold.co/400x300?text=Error'}
+                    />
+                    <h4 className="font-semibold text-white text-sm mb-1 truncate">{product.nombre}</h4>
+                    <p className="text-emerald-400 font-bold text-base sm:text-lg mb-2">${product.precio?.toLocaleString()}</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        Stock: {product.cantidad}
+                      </span>
+                      <button onClick={() => openModal(product)} className="text-cyan-400 hover:text-cyan-300 transition">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => toggleDisponibilidad(product._id)}
+                      className="w-full py-1.5 px-3 text-xs font-medium rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-300 border border-red-500/30 transition-all flex items-center justify-center gap-1"
+                    >
+                      <XCircle className="w-3 h-3" />
+                      Marcar como No Disponible
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {availableProducts.length === 0 && (
+                <div className="text-center py-8">
+                  <CheckCircle className="w-12 h-12 sm:w-16 sm:h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 text-sm sm:text-base">No hay productos disponibles</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Sección Productos No Disponibles */}
+        {showUnavailableProducts && (
+          <div className="mb-6 animate-slideIn">
+            <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border border-red-500/30 p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h3 className="text-lg sm:text-xl font-bold text-white flex items-center gap-2">
+                    <XCircle className="w-5 h-5 sm:w-6 sm:h-6 text-red-400" />
+                    Productos Sin Stock
+                  </h3>
+                  <p className="text-xs sm:text-sm text-gray-400 mt-1">Vehículos no disponibles o sin stock</p>
+                </div>
+                <button onClick={() => setShowUnavailableProducts(false)} className="text-gray-400 hover:text-white transition">
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
+                {unavailableProducts.map((product) => (
+                  <div key={product._id} className="bg-slate-900/50 border border-red-500/20 rounded-lg p-3 hover:border-red-500/40 transition-all opacity-75">
+                    <img 
+                      src={product.imagen || 'https://placehold.co/400x300?text=Sin+Imagen'} 
+                      alt={product.nombre} 
+                      className="w-full h-32 sm:h-40 object-cover rounded-lg mb-3 grayscale"
+                      onError={(e) => e.target.src = 'https://placehold.co/400x300?text=Error'}
+                    />
+                    <h4 className="font-semibold text-white text-sm mb-1 truncate">{product.nombre}</h4>
+                    <p className="text-red-400 font-bold text-base sm:text-lg mb-2">${product.precio?.toLocaleString()}</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs px-2 py-1 rounded-full bg-red-500/20 text-red-300 border border-red-500/30">
+                        Stock: {product.cantidad || 0}
+                      </span>
+                      <button onClick={() => openModal(product)} className="text-cyan-400 hover:text-cyan-300 transition">
+                        <Edit2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => toggleDisponibilidad(product._id)}
+                      disabled={(product.cantidad || 0) === 0}
+                      className="w-full py-1.5 px-3 text-xs font-medium rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 transition-all flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                      title={(product.cantidad || 0) === 0 ? 'Debe tener stock para marcar como disponible' : ''}
+                    >
+                      <CheckCircle className="w-3 h-3" />
+                      Marcar como Disponible
+                    </button>
+                  </div>
+                ))}
+              </div>
+
+              {unavailableProducts.length === 0 && (
+                <div className="text-center py-8">
+                  <XCircle className="w-12 h-12 sm:w-16 sm:h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400 text-sm sm:text-base">Todos los productos están disponibles</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         <div className="bg-slate-800/50 backdrop-blur-xl rounded-xl shadow-xl border border-cyan-500/20 p-4 sm:p-6 mb-4 sm:mb-6">
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-stretch sm:items-center">
@@ -497,9 +720,7 @@ const Admin = () => {
                         src={product.imagen || 'https://placehold.co/400x300?text=Sin+Imagen'} 
                         alt={product.nombre}
                         className="w-16 h-16 object-cover rounded-lg border-2 border-cyan-500/30 shadow-lg"
-                        onError={(e) => {
-                          e.target.src = 'https://placehold.co/400x300?text=Error';
-                        }}
+                        onError={(e) => e.target.src = 'https://placehold.co/400x300?text=Error'}
                       />
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -567,9 +788,7 @@ const Admin = () => {
                   src={product.imagen || 'https://placehold.co/400x300?text=Sin+Imagen'} 
                   alt={product.nombre} 
                   className="w-16 h-16 rounded-lg object-cover flex-shrink-0 border-2 border-cyan-500/30 shadow-lg"
-                  onError={(e) => {
-                    e.target.src = 'https://placehold.co/400x300?text=Error';
-                  }}
+                  onError={(e) => e.target.src = 'https://placehold.co/400x300?text=Error'}
                 />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold text-white truncate text-sm">{product.nombre}</h3>
@@ -757,12 +976,13 @@ const Admin = () => {
                     min="0"
                     value={formData.cantidad}
                     onChange={(e) => {
-                      const cantidad = e.target.value;
+                      const cantidad = parseInt(e.target.value) || 0;
+                      const shouldBeAvailable = cantidad > 0 && (parseInt(formData.cantidad) === 0 || formData.cantidad === '');
+                      
                       setFormData({ 
                         ...formData, 
-                        cantidad: cantidad,
-                        // Si la cantidad es 0, automáticamente poner disponible en false
-                        disponible: parseInt(cantidad) === 0 ? false : formData.disponible
+                        cantidad: e.target.value,
+                        disponible: cantidad === 0 ? false : (shouldBeAvailable ? true : formData.disponible)
                       });
                     }}
                     placeholder="0"
@@ -791,7 +1011,6 @@ const Admin = () => {
                 </div>
               </div>
 
-              {/* SECCIÓN DE IMAGEN */}
               <div className="border-t border-slate-700/50 pt-4">
                 <label className="block text-xs sm:text-sm font-medium text-gray-300 mb-3">
                   Imagen del Producto
@@ -911,9 +1130,7 @@ const Admin = () => {
                         src={formData.imagen}
                         alt="Preview"
                         className="w-32 h-32 sm:w-40 sm:h-40 object-cover rounded-lg border-2 border-cyan-500/30 shadow-lg shadow-cyan-500/20"
-                        onError={(e) => {
-                          e.target.src = 'https://placehold.co/400x300?text=Error+al+cargar';
-                        }}
+                        onError={(e) => e.target.src = 'https://placehold.co/400x300?text=Error+al+cargar'}
                       />
                       {uploadMethod === 'file' && selectedFile && (
                         <div className="absolute -top-2 -right-2 bg-gradient-to-br from-cyan-500 to-blue-500 text-white rounded-full p-1 shadow-lg shadow-cyan-500/50">
